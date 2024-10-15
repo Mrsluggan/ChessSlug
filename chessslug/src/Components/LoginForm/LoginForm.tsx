@@ -1,22 +1,23 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 
 interface LoginFormProps {
-    onRegister: (firstName: string, lastName: string, username: string, password: string) => void;
-    onLogin: (username: string, password: string) => void;
-}
-
-export default function LoginForm(props: LoginFormProps) {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [active, setActive] = useState("login");
+    handleLogin: (login: string, password: string) => void;
+    handleRegister: (firstName: string, lastName: string, login: string, password: string) => void;
+  }
+  
+  export default function LoginForm({ handleLogin, handleRegister }: LoginFormProps) {
+    // ...
+    const [active, setActive] = useState<"login" | "register">("login");
+    const [firstName, setFirstName] = useState<string>("");
+    const [lastName, setLastName] = useState<string>("");
+    const [login, setLogin] = useState<string>(""); 
+    const [password, setPassword] = useState<string>("");
 
     const onChange = (event: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         switch (name) {
             case 'username':
-                setUsername(value);
+                setLogin(value);
                 break;
             case 'password':
                 setPassword(value);
@@ -30,18 +31,17 @@ export default function LoginForm(props: LoginFormProps) {
             default:
                 break;
         }
-    }
+    };
 
     const onSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        
-        props.onLogin(username, password);
-    }
+        handleLogin(login, password);
+    };
 
     const onSubmitRegister = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        props.onRegister(firstName, lastName, username, password);
-    }
+        handleRegister(firstName, lastName, login, password); 
+    };
 
     return (
         <div>
@@ -69,7 +69,7 @@ export default function LoginForm(props: LoginFormProps) {
                 <input
                     type="text"
                     name="username"
-                    value={username}
+                    value={login}
                     onChange={onChange}
                     placeholder="Username"
                     required
@@ -91,3 +91,5 @@ export default function LoginForm(props: LoginFormProps) {
         </div>
     );
 }
+
+
