@@ -30,13 +30,6 @@ const handleLogin = (login: string, password: string) => {
 };
 
 
-const getdata = () => {
-  request("GET", "/message", "").then((response) => {
-    console.log(response);
-  }).catch((error) => {
-    console.log(error);
-  })
-}
 
 function App() {
   return (

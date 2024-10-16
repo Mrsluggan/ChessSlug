@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
+import { sendMove, getMove } from "./ChessLogic"
+
 
 export default function Board() {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
@@ -53,7 +55,7 @@ export default function Board() {
             let position = { row: Math.floor(fromIndex / 8), col: fromIndex % 8 };
 
             updatePawnsPosition(selectedTile.row, selectedTile.col, position.row, position.col, pawn);
-            console.log("där rörde pjäsen: " + selectedPawn + " " + " från " + selectedTile.row + " " + selectedTile.col  + " till " + position.row + " " + position.col);
+            console.log("där rörde pjäsen: " + selectedPawn + " " + " från " + selectedTile.row + " " + selectedTile.col + " till " + position.row + " " + position.col);
 
             setSelectedPawn(null);
             setSelectedTile(null)
@@ -67,9 +69,21 @@ export default function Board() {
         }
 
     }
+    const handleSendData = () => {
+        sendMove(boardPawnsPosition);
+    }
+
+    const handleGetData = () => {
+        getMove().then((data:any) => {
+            const newBoardPawnsPosition = [...data.data].map(row => [...row]);
+            setBoardPawnsPosition(newBoardPawnsPosition);
+        });
+    };
 
     return (
         <>
+            <button onClick={handleSendData}> skicka </button>
+            <button onClick={handleGetData}> hämta </button>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center" }}>
                 {
