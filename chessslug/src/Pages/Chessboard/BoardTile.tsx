@@ -1,69 +1,65 @@
-import React from 'react'
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react';
 
 interface BoardTileProps {
     color: string;
     tileIndex: number;
     initialPawn: string | null;
-
+    handlePawnMove: (fromIndex: number, pawn: string | null) => void
 }
-export default function BoardTile({ color, tileIndex, initialPawn }: BoardTileProps) {
-    const [pawn, setPawn] = useState(initialPawn); // Använd en state för pawn
-    const handleClick = () => {
-        console.log("på denna tile: " + tileIndex + " finns en "+ initialPawn);
 
-    }
-    const handleDisplayPawn = () => {
+export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMove }: BoardTileProps) {
+    const [pawn, setPawn] = useState<string | null>(null);
+
+
+    const handleDisplayPawn = (pawn: string | null) => {
         switch (pawn) {
             case "svart_bonde":
-                setPawn("♙");
-                break;
+                return "♙";
             case "svart_torn":
-                setPawn("♖");
-                break;
+                return "♖";
             case "svart_horse":
-                setPawn("♘");
-                break;
+                return "♘";
             case "svart_löpare":
-                setPawn("♗");
-                break;
+                return "♗";
             case "svart_drottning":
-                setPawn("♕");
-                break;
+                return "♕";
             case "svart_kung":
-                setPawn("♔");
-                break;
+                return "♔";
             case "vit_bonde":
-                setPawn("♟");
-                break;
+                return "♟";
             case "vit_torn":
-                setPawn("♜");
-                break;
+                return "♜";
             case "vit_horse":
-                setPawn("♞");
-                break;
+                return "♞";
             case "vit_löpare":
-                setPawn("♝");
-                break;
+                return "♝";
             case "vit_drottning":
-                setPawn("♛");
-                break;
+                return "♛";
             case "vit_kung":
-                setPawn("♚");
-                break;
+                return "♚";
             default:
-                break;
+                return null;
         }
     }
 
     useEffect(() => {
+        // Varje gång initialPawn ändras, uppdatera pawn
+        setPawn(handleDisplayPawn(initialPawn));
+    }, [initialPawn]); // Lägg till initialPawn som beroende
 
-        handleDisplayPawn();
-    }, []);
+    const handleClick = () => {
+        handlePawnMove(tileIndex,pawn)
+    }
+
+
+
 
     return (
-        <div onClick={handleClick} className='BoardTile' style={{ width: "100px", height: "100px", margin: "0", backgroundColor: color, textAlign: "center", fontSize: "70px" }}>
+        <div onClick={handleClick}
+            className='BoardTile'
+            style={{ width: "100px", height: "100px", margin: "0", backgroundColor: color, textAlign: "center", fontSize: "70px" }}
+        >
             {pawn}
         </div>
-    )
+    );
 }
