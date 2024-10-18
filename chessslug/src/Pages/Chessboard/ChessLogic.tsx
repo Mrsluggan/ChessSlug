@@ -13,7 +13,7 @@ export const sendMove = (positionData: any) => {
 
 export const getMove = async () => {
     try {
-        const response = await request("GET", `/chessboards/1`, "");
+        const response = await request("GET", `/gameState/3`, "");
         return response;
     } catch (error) {
         console.log(error);

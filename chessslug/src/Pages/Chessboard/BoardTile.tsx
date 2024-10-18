@@ -3,52 +3,67 @@ import React, { useState, useEffect } from 'react';
 interface BoardTileProps {
     color: string;
     tileIndex: number;
-    initialPawn: string | null;
+    initialPawn: { color: string, name: string } | null
     handlePawnMove: (fromIndex: number, pawn: string | null) => void
 }
 
 export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMove }: BoardTileProps) {
-    const [pawn, setPawn] = useState<string | null>(null);
+    const [pawn, setPawn] = useState<any | null>(null);
     const [colorCheck, setColorCheck] = useState<string>(color);
     const [selected, setSelected] = useState<boolean>(false);
 
-    const handleDisplayPawn = (pawn: string | null) => {
-        switch (pawn) {
-            case "svart_bonde":
-                return "♙";
-            case "svart_torn":
-                return "♖";
-            case "svart_horse":
-                return "♘";
-            case "svart_löpare":
-                return "♗";
-            case "svart_drottning":
-                return "♕";
-            case "svart_kung":
-                return "♔";
-            case "vit_bonde":
-                return "♟";
-            case "vit_torn":
-                return "♜";
-            case "vit_horse":
-                return "♞";
-            case "vit_löpare":
-                return "♝";
-            case "vit_drottning":
-                return "♛";
-            case "vit_kung":
-                return "♚";
+    const handleDisplayPawn = (color: string, name: string) => {
+        switch (color) {
+            case "white":
+                switch (name) {
+                    case "Pawn":
+                        return "♙";
+                    case "Rook":
+                        return "♖";
+                    case "Knight":
+                        return "♘";
+                    case "Bishop":
+                        return "♗";
+                    case "Queen":
+                        return "♕";
+                    case "King":
+                        return "♔";
+
+                }
+                break;
+            case "black":
+                switch (name) {
+
+                    case "Pawn":
+                        return "♟";
+                    case "Rook":
+                        return "♜";
+                    case "Knight":
+                        return "♞";
+                    case "Bishop":
+                        return "♝";
+                    case "Queen":
+                        return "♛";
+                    case "King":
+                        return "♚";
+                    default:
+                        return null;
+
+                }
+                break;
             default:
                 return null;
         }
     }
 
+
+
     useEffect(() => {
-        // Varje gång initialPawn ändras, uppdatera pawn
-        setPawn(handleDisplayPawn(initialPawn));
+        if (initialPawn) {
+            setPawn(handleDisplayPawn(initialPawn.color, initialPawn.name));
+        }
         setColorCheck(color);
     }, [initialPawn]);
-
 
 
     const handleClick = () => {
@@ -60,7 +75,6 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
                 setSelected(true);
             }
         }
-        handlePawnMove(tileIndex, pawn)
     }
 
 

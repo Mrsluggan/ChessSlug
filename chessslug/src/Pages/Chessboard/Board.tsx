@@ -5,7 +5,7 @@ import { sendMove, getMove, createBoard } from "./ChessLogic"
 
 export default function Board() {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
-    const [boardPawnsPosition, setBoardPawnsPosition] = useState<(string | null)[][]>([]);
+    const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>([]);
     const [selectedPawn, setSelectedPawn] = useState<string | null>();
     const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
     const [board, setBoard] = useState<{ id: any, positions: { rowData: (string | null)[] }[] }>({
@@ -42,7 +42,6 @@ export default function Board() {
         const toX = tX, toY = tY;
 
         newBoardPawnsPosition[toX][toY] = newBoardPawnsPosition[fromX][fromY];
-        newBoardPawnsPosition[fromX][fromY] = null;
 
         setBoardPawnsPosition(newBoardPawnsPosition);
     }
@@ -54,7 +53,7 @@ export default function Board() {
 
             updatePawnsPosition(selectedTile.row, selectedTile.col, position.row, position.col, pawn);
             console.log("där rörde pjäsen: " + selectedPawn + " " + " från " + selectedTile.row + " " + selectedTile.col + " till " + position.row + " " + position.col);
-            
+
             handleSendData();
             setSelectedPawn(null);
             setSelectedTile(null)
@@ -69,8 +68,6 @@ export default function Board() {
 
     }
     const handleSendData = () => {
-        board.positions = boardPawnsPosition.map(row => ({ rowData: row }));
-        sendMove(board);
     }
     const handleNewBoard = async () => {
         await createBoard();
@@ -79,15 +76,17 @@ export default function Board() {
     const handleGetData = () => {
         getMove().then((data: any) => {
             if (data) {
+
                 setBoard(data.data);
                 let newBoardPawnsPosition: any[] = [];
 
-                data.data.positions.forEach((element: any) => {
-                    newBoardPawnsPosition.push(element.rowData)
+                data.data.board.squares.forEach((element: any) => {
+                    newBoardPawnsPosition.push(element)
 
                 });
-                setBoardPawnsPosition(newBoardPawnsPosition);
 
+                setBoardPawnsPosition(newBoardPawnsPosition)
+                
             }
         });
     };
