@@ -9,7 +9,8 @@ interface BoardTileProps {
 
 export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMove }: BoardTileProps) {
     const [pawn, setPawn] = useState<string | null>(null);
-
+    const [colorCheck, setColorCheck] = useState<string>(color);
+    const [selected, setSelected] = useState<boolean>(false);
 
     const handleDisplayPawn = (pawn: string | null) => {
         switch (pawn) {
@@ -45,10 +46,21 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
     useEffect(() => {
         // Varje gång initialPawn ändras, uppdatera pawn
         setPawn(handleDisplayPawn(initialPawn));
-    }, [initialPawn]); // Lägg till initialPawn som beroende
+        setColorCheck(color);
+    }, [initialPawn]);
+
+
 
     const handleClick = () => {
-        handlePawnMove(tileIndex,pawn)
+        if (selected) {
+            setSelected(false);
+        } else {
+            if (pawn) {
+                setColorCheck("white");
+                setSelected(true);
+            }
+        }
+        handlePawnMove(tileIndex, pawn)
     }
 
 
@@ -57,7 +69,7 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
     return (
         <div onClick={handleClick}
             className='BoardTile'
-            style={{ width: "100px", height: "100px", margin: "0", backgroundColor: color, textAlign: "center", fontSize: "70px" }}
+            style={{ width: "100px", height: "100px", margin: "0", backgroundColor: colorCheck, textAlign: "center", fontSize: "70px" }}
         >
             {pawn}
         </div>

@@ -9,26 +9,30 @@ axios.defaults.headers.common["Content-Type"] = "application/json";
 export const getAuthToken = (): string | null => {
     return window.localStorage.getItem("auth_token");
 }
-
-export const setAuthToken = (token: string) => {
-    window.localStorage.setItem("auth_token",token);
+export const removeToken = (): void => {
+    window.localStorage.removeItem("auth_token");
 }
-export const request = (method: string, url: string, data: string) => {
-    let headers = {
-        
-    }
-    const authToken = getAuthToken();
-    if (authToken !== null && authToken !== "null") {
+export const setAuthToken = (token: string) => {
+    window.localStorage.setItem("auth_token", token);
+}
 
-        headers = {
-            Authorization: `Bearer ${authToken}`
+export const request = async (method: string, url: string, data?: any) => {
+
+        const authToken = getAuthToken();
+
+        // Set up headers if authToken exists
+        const headers: Record<string, string> = {};
+        if (authToken && authToken !== "null") {
+            headers.Authorization = `Bearer ${authToken}`;
         }
 
-    }
-    return axios({
-        method: method,
-        headers: headers,
-        url: url,
-        data: data
-    })
+        // Return the axios request
+        return await axios({
+            method,
+            url,
+            data: data || null,  // Handle cases where data might be undefined
+            headers
+        });
+
+    
 }

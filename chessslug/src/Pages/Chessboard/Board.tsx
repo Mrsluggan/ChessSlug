@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
-import { sendMove, getMove } from "./ChessLogic"
+import { sendMove, getMove, createBoard } from "./ChessLogic"
 
 
 export default function Board() {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
-    const [boardPawnsPosition, setBoardPawnsPosition] = useState<(string | null)[][]>([
-        ['svart_torn', 'svart_horse', 'svart_löpare', 'svart_drottning', 'svart_kung', 'svart_löpare', 'svart_horse', 'svart_torn'],
-        ['svart_bonde', 'svart_bonde', 'svart_bonde', 'svart_bonde', 'svart_bonde', 'svart_bonde', 'svart_bonde', 'svart_bonde'],
-        [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null],
-        ['vit_bonde', 'vit_bonde', 'vit_bonde', 'vit_bonde', 'vit_bonde', 'vit_bonde', 'vit_bonde', 'vit_bonde'],
-        ['vit_torn', 'vit_horse', 'vit_löpare', 'vit_drottning', 'vit_kung', 'vit_löpare', 'vit_horse', 'vit_torn']
-    ]);
+    const [boardPawnsPosition, setBoardPawnsPosition] = useState<(string | null)[][]>([]);
     const [selectedPawn, setSelectedPawn] = useState<string | null>();
     const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
+    const [board, setBoard] = useState<{ id: any, positions: { rowData: (string | null)[] }[] }>({
+        id: null,
+        positions: []
+    });
 
     useEffect(() => {
-        initializeBoard();
-    }, []);
+
+        if (boardPawnsPosition.length > 0) {
+            initializeBoard();
+
+        }
+    }, [boardPawnsPosition]);
 
     const initializeBoard = () => {
         let colorCheck = false;
@@ -49,14 +48,14 @@ export default function Board() {
     }
 
     const handlePawnMove = (fromIndex: number, pawn: string | null) => {
-        let position = { row: Math.floor(fromIndex / 8), col: fromIndex % 8 };
 
         if (selectedTile != null) {
             let position = { row: Math.floor(fromIndex / 8), col: fromIndex % 8 };
 
             updatePawnsPosition(selectedTile.row, selectedTile.col, position.row, position.col, pawn);
             console.log("där rörde pjäsen: " + selectedPawn + " " + " från " + selectedTile.row + " " + selectedTile.col + " till " + position.row + " " + position.col);
-
+            
+            handleSendData();
             setSelectedPawn(null);
             setSelectedTile(null)
         } else {
@@ -70,30 +69,47 @@ export default function Board() {
 
     }
     const handleSendData = () => {
-        sendMove(boardPawnsPosition);
+        board.positions = boardPawnsPosition.map(row => ({ rowData: row }));
+        sendMove(board);
+    }
+    const handleNewBoard = async () => {
+        await createBoard();
     }
 
     const handleGetData = () => {
-        getMove().then((data:any) => {
-            const newBoardPawnsPosition = [...data.data].map(row => [...row]);
-            setBoardPawnsPosition(newBoardPawnsPosition);
+        getMove().then((data: any) => {
+            if (data) {
+                setBoard(data.data);
+                let newBoardPawnsPosition: any[] = [];
+
+                data.data.positions.forEach((element: any) => {
+                    newBoardPawnsPosition.push(element.rowData)
+
+                });
+                setBoardPawnsPosition(newBoardPawnsPosition);
+
+            }
         });
     };
 
     return (
         <>
-            <button onClick={handleSendData}> skicka </button>
-            <button onClick={handleGetData}> hämta </button>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center" }}>
-                {
-                    boardTiles.map((color, index) => (
-                        <BoardTile handlePawnMove={handlePawnMove} key={index} color={color} tileIndex={index} initialPawn={boardPawnsPosition[Math.floor(index / 8)][index % 8]} />
-                    ))
-                }
 
+            <div>
+                <button onClick={handleSendData}> skicka </button>
+                <button onClick={handleGetData}> hämta </button>
+                <button onClick={handleNewBoard}> Skapa </button>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center" }}>
+
+                    {boardTiles.length > 0 &&
+                        boardTiles.map((color, index) => (
+                            <BoardTile handlePawnMove={handlePawnMove} key={index} color={color} tileIndex={index} initialPawn={boardPawnsPosition[Math.floor(index / 8)][index % 8]} />
+                        ))
+                    }
+
+                </div>
             </div>
-
         </>
     )
 }

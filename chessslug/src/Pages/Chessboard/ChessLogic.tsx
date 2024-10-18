@@ -1,7 +1,9 @@
 
-import { request, getAuthToken, setAuthToken } from '../../axios_helper'
+import { request } from '../../axios_helper'
 
-export const sendMove = (positionData:any) => {
+export const sendMove = (positionData: any) => {
+    console.log(positionData);
+
     request("POST", "/chess", positionData).then((response) => {
         console.log(response);
     }).catch((error) => {
@@ -9,12 +11,19 @@ export const sendMove = (positionData:any) => {
     })
 }
 
-export const getMove = () => {
-    return request("GET", "/getChess", "") 
-        .then((response) => {
-            return response;  
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+export const getMove = async () => {
+    try {
+        const response = await request("GET", `/chessboards/1`, "");
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+};
+export const createBoard = async () => {
+    try {
+        const response = await request("GET", "/createChess", "");
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
 };
