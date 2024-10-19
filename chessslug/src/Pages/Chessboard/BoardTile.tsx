@@ -54,8 +54,6 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
         }
     }
 
-
-
     useEffect(() => {
         if (initialPawn) {
             setPawn(handleDisplayPawn(initialPawn.color, initialPawn.name));
@@ -63,17 +61,12 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
         setColorCheck(color);
     }, [initialPawn]);
 
-
     const handleClick = () => {
         if (pawn) {
             setColorCheck("white");
         }
         handlePawnMove(tileIndex);
-
     }
-
-
-
 
     return (
         <div onClick={handleClick}

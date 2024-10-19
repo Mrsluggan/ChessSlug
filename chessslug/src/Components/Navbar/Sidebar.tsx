@@ -1,5 +1,5 @@
 import React from 'react'
-import { request, setAuthToken, getAuthToken } from "../../axios_helper"
+import { request, setAuthToken } from "../../axios_helper"
 
 export default function Sidebar() {
     const handleRegister = (firstName: string, lastName: string, login: string, password: string) => {

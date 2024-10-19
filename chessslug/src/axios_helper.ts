@@ -1,6 +1,5 @@
 
 import axios from "axios";
-import { get } from "http";
 
 axios.defaults.baseURL = "http://localhost:8080";
 axios.defaults.headers.common["Content-Type"] = "application/json";

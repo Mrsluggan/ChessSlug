@@ -5,7 +5,7 @@ import Board from './Chessboard/Board';
 export default function Home() {
     const [allCurrentGames, setAllCururentGames] = useState<[]>([])
     const [currentGameId, setCurrentGameId] = useState<number | null>(null);
-    
+
     useEffect(() => {
         if (getAuthToken()) {
             request("GET", "/gameState/all").then((response) => {
