@@ -26,20 +26,13 @@ const handleLogin = (login: string, password: string) => {
   })
 };
 
-const loginButton = () => {
-  handleLogin("123", "123")
-}
-
-
 function App() {
   return (
     <div className="App" style={{ height: "100%", display: "flex", }}>
       <BrowserRouter>
         <Sidebar />
-        <button onClick={loginButton}>Logga in</button>
         <Routes>
           <Route index element={<Home />} />
-          <Route path="board" element={<Board />} />
           <Route path="*" element={<> error 404</>} />
         </Routes>
       </BrowserRouter>

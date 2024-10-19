@@ -4,13 +4,12 @@ interface BoardTileProps {
     color: string;
     tileIndex: number;
     initialPawn: { color: string, name: string } | null
-    handlePawnMove: (fromIndex: number, pawn: string | null) => void
+    handlePawnMove: (indexNumber: number) => void
 }
 
 export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMove }: BoardTileProps) {
     const [pawn, setPawn] = useState<any | null>(null);
     const [colorCheck, setColorCheck] = useState<string>(color);
-    const [selected, setSelected] = useState<boolean>(false);
 
     const handleDisplayPawn = (color: string, name: string) => {
         switch (color) {
@@ -50,7 +49,6 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
                         return null;
 
                 }
-                break;
             default:
                 return null;
         }
@@ -67,14 +65,11 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
 
 
     const handleClick = () => {
-        if (selected) {
-            setSelected(false);
-        } else {
-            if (pawn) {
-                setColorCheck("white");
-                setSelected(true);
-            }
+        if (pawn) {
+            setColorCheck("white");
         }
+        handlePawnMove(tileIndex);
+
     }
 
 

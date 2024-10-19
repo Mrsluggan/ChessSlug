@@ -1,19 +1,21 @@
 
 import { request } from '../../axios_helper'
 
-export const sendMove = (positionData: any) => {
-    console.log(positionData);
 
-    request("POST", "/chess", positionData).then((response) => {
-        console.log(response);
-    }).catch((error) => {
-        console.log(error);
-    })
-}
 
-export const getMove = async () => {
+export const getMove = async (gameId: number) => {
     try {
-        const response = await request("GET", `/gameState/3`, "");
+        const response = await request("GET", `/gameState/${gameId}`, "");
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const sendMove = async (gameId: number, fX: number, fY: number, tX: number, tY: number) => {
+    try {
+        const response = await request("POST", `/gameState/${gameId}/move/?startRow=${fX}&startCol=${fY}&endRow=${tX}&endCol=${tY}`, "");
+
         return response;
     } catch (error) {
         console.log(error);

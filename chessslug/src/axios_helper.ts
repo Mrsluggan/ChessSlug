@@ -18,21 +18,21 @@ export const setAuthToken = (token: string) => {
 
 export const request = async (method: string, url: string, data?: any) => {
 
-        const authToken = getAuthToken();
+    const authToken = getAuthToken();
 
-        // Set up headers if authToken exists
-        const headers: Record<string, string> = {};
-        if (authToken && authToken !== "null") {
-            headers.Authorization = `Bearer ${authToken}`;
-        }
+    // Set up headers if authToken exists
+    const headers: Record<string, string> = {};
+    if (authToken && authToken !== "null") {
+        headers.Authorization = `Bearer ${authToken}`;
+    }
 
-        // Return the axios request
-        return await axios({
-            method,
-            url,
-            data: data || null,  // Handle cases where data might be undefined
-            headers
-        });
+    // Return the axios request
+    return await axios({
+        method,
+        url,
+        data: data || null,  // Handle cases where data might be undefined
+        headers
+    });
 
-    
+
 }
