@@ -9,13 +9,7 @@ body {
 }
 
 button {
-  background-color: #ecf0f1;
-  color: #333;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  font-size: 1.2em;
+
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
 }

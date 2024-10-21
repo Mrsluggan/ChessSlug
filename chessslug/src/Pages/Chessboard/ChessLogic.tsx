@@ -23,7 +23,25 @@ export const sendMove = async (gameId: number, fX: number, fY: number, tX: numbe
 };
 export const createBoard = async () => {
     try {
-        const response = await request("POST", `/create/gameState`, "");
+        const response = await request("GET", `/create/gameState/`, "");
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const joinBoard = async (gameId: number) => {
+    try {
+        const response = await request("PUT", `/gameState/${gameId}`, "");
+        return response;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const removeBoard = async (gameId: number) => {
+    try {
+        const response = await request("DELETE", `/gameState/${gameId}`, "");
         return response;
     } catch (error) {
         console.log(error);

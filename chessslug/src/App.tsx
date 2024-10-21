@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext } from 'react';
+import React, { useEffect, useState, createContext, useRef } from 'react';
 
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ export const UserLoggedInContext = createContext(false);
 
 function App() {
   const [isLoggedIn, setLoggedIn] = useState(false);
-
+ 
 
   const handleSetLoggedIn = () => {
     setLoggedIn(!isLoggedIn);

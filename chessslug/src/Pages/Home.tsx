@@ -5,6 +5,7 @@ import { useEffect, useState, useContext } from 'react'
 import { UserLoggedInContext } from '../App';
 
 import Board from './Chessboard/Board';
+import { createBoard, joinBoard,removeBoard } from './Chessboard/ChessLogic';
 export default function Home() {
     const [allCurrentGames, setAllCururentGames] = useState<[]>([])
     const [currentGameId, setCurrentGameId] = useState<number | null>(null);
@@ -24,13 +25,14 @@ export default function Home() {
         }
     }, [isLoggedIn])
 
-    const joingame = (gameId: any) => {
-        console.log(gameId);
+    const joingame = (gameId: number) => {
+        joinBoard(gameId)
         setCurrentGameId(gameId);
     }
-    const createGame = (gameId: any) => {
-        console.log(gameId);
-        setCurrentGameId(gameId);
+    const createGame = () => {
+
+        createBoard()
+
     }
 
 
@@ -50,7 +52,12 @@ export default function Home() {
                                             allCurrentGames.map((data: any, index) => (
                                                 <li key={index}>
                                                     Schack spel
-                                                    <button onClick={() => joingame(data.id)}>Join</button>
+                                                    <button onClick={() => joingame(data.id)}>Join</button><br />
+                                                    Spelare
+                                                    {data.players.map((element: any, index: number) => (
+                                                        <div key={index}>{element.login}</div>
+                                                    ))}
+                                                    <button onClick={() => removeBoard(data.id)}>Ta bort bräde</button>
                                                 </li>
                                             ))
 
