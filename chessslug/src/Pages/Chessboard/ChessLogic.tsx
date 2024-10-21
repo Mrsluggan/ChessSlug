@@ -23,7 +23,7 @@ export const sendMove = async (gameId: number, fX: number, fY: number, tX: numbe
 };
 export const createBoard = async () => {
     try {
-        const response = await request("GET", "/createChess", "");
+        const response = await request("POST", `/create/gameState`, "");
         return response;
     } catch (error) {
         console.log(error);

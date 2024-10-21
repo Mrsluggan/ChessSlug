@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, createContext } from 'react';
 
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 
 import Home from './Pages/Home';
 import Sidebar from './Components/Navbar/Sidebar';
 import { getAuthToken, request } from './axios_helper';
+export const UserLoggedInContext = createContext(false);
 
 function App() {
-  const [isLoggedIn, setLoggedIn] = useState(false)
+  const [isLoggedIn, setLoggedIn] = useState(false);
+
+
   const handleSetLoggedIn = () => {
-    setLoggedIn(!isLoggedIn); 
-  } 
-  
-  
+    setLoggedIn(!isLoggedIn);
+  }
+
+
   useEffect(() => {
     if (getAuthToken()) {
       request("GET", "/gameState/all").then((response) => {
@@ -29,16 +32,18 @@ function App() {
   return (
     <div className="App" style={{ height: "100%", display: "flex", }}>
       <BrowserRouter>
-        <Sidebar handleSetLoggedIn={handleSetLoggedIn} isLoggedIn={isLoggedIn} />
-        <Routes>
-          {isLoggedIn && (
-            <>
-              <Route index element={<Home />} />
-            </>
-          )}
-          <Route path="*" element={<> error 404</>} />
+        <UserLoggedInContext.Provider value={isLoggedIn}>
 
-        </Routes>
+          <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
+          <Routes>
+
+            <Route index element={<Home />} />
+
+            <Route path="*" element={<> error 404</>} />
+
+          </Routes>
+        </UserLoggedInContext.Provider>
+
       </BrowserRouter>
 
     </div>

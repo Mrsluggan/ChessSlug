@@ -2,18 +2,21 @@ import React from 'react'
 import LoginFunction from '../userFunctions/LoginFunction';
 import { handleLogout } from '../userFunctions/userRestFunctions';
 import Register from '../userFunctions/Register';
-
+import { useContext } from 'react';
+import { UserLoggedInContext } from '../../App';
 
 interface SidebarProps {
-    isLoggedIn: boolean
     handleSetLoggedIn: () => void;
 }
 
-export default function Sidebar({ isLoggedIn, handleSetLoggedIn }: SidebarProps) {
+export default function Sidebar({ handleSetLoggedIn }: SidebarProps) {
+    const isLoggedIn = useContext(UserLoggedInContext);
+
     const handleButton = () => {
         handleLogout();
         handleSetLoggedIn();
     }
+    
     return (
         <div style={{ backgroundColor: "#1c1c1e", height: "100vh", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div className='upperSidebar'>
