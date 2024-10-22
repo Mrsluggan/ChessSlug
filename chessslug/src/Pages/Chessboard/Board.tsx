@@ -1,31 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
-import { sendMove, getMove } from "./ChessLogic"
-import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
+import { sendMove, getMove, sendMoveSocket } from "./ChessLogic"
+
+
 interface BoardProps {
-    gameId: number
+    gameId: number,
+    newMovmentData: any
+
 }
-export default function Board({ gameId }: BoardProps) {
+export default function Board({ gameId, newMovmentData }: BoardProps) {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
     const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>([]);
     const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
-    const socket = new SockJS("http://localhost:8080/ws");
-    const stompClient = Stomp.over(socket);
 
-    stompClient.connect({}, () => {
-        stompClient.subscribe('/topic/gamestate/'+gameId, (message) => {
-            handleGetData();
-        });
-    });
+
 
     useEffect(() => {
         handleGetData();
-    }, []);
+    }, [gameId]);
+
+
+    useEffect(() => {
+        if (newMovmentData && newMovmentData.selectedTile && newMovmentData.position) {
+            movePiece(newMovmentData.selectedTile, newMovmentData.position)
+        }
+    }, [newMovmentData]);
 
     const initializeBoard = () => {
         let colorCheck = false;
         let newBoardTiles = [];
+        handleGetData();
 
         for (let xIndex = 0; xIndex < 8; xIndex++) {
             for (let yIndex = 0; yIndex < 8; yIndex++) {
@@ -36,16 +40,25 @@ export default function Board({ gameId }: BoardProps) {
         }
         setBoardTiles(newBoardTiles);
     }
+
+    const movePiece = (fromIndex: { row: number; col: number }, toIndex: { row: number; col: number }) => {
+        console.log("nu körs programmet!");
+
+        let updatedBoard = [...boardPawnsPosition];
+        updatedBoard[toIndex.row][toIndex.col] = updatedBoard[fromIndex.row][fromIndex.col];
+        updatedBoard[fromIndex.row][toIndex.col] = { color: "", name: "" };
+
+        setBoardPawnsPosition(updatedBoard);
+    }
     const handlePawnMove = async (indexNumber: number) => {
         if (selectedTile && gameId) {
             let position = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
+
+
+            // todo, fixa så man kollar om movment är korrekt!
             await sendMove(gameId, selectedTile.row, selectedTile.col, position.row, position.col);
+            sendMoveSocket(gameId, selectedTile, position)
 
-            stompClient.send("/app/gamestate/" + gameId, {}, JSON.stringify({ message: "test" }));
-
-
-            handleGetData();
-            setBoardTiles([]);
             setSelectedTile(null);
         } else {
             console.log("pjäsen vald!");
@@ -70,7 +83,7 @@ export default function Board({ gameId }: BoardProps) {
     return (
         <>
             <div>
-            <button onClick={() => initializeBoard()}>Starta</button>
+                <button onClick={() => initializeBoard()}>Starta</button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center", justifyContent: "center" }}>
                     {boardTiles.length > 0 &&
                         boardTiles.map((color, index) => (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { sendMove } from "./ChessLogic"
 
 interface BoardTileProps {
     color: string;

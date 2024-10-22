@@ -11,8 +11,9 @@ export default function LoginFunction({ handleSetLoggedIn }: LoginFunctionProp) 
         let password = prompt("password")
         if (login && password) {
             handleLogin(login, password);
+            handleSetLoggedIn();
+
         }
-        handleSetLoggedIn();
 
 
     }

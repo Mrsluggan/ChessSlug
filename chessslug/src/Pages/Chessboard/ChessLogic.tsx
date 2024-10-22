@@ -1,7 +1,41 @@
 
 import { request } from '../../axios_helper'
 
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 
+let stompClient: any = null;
+
+export const connectWebSocket = (gameId: number, onMessageReceived: (data: any) => void) => {
+    const socket = new SockJS("http://localhost:8080/ws");
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+        console.log("WebSocket ansluten");
+        stompClient.subscribe(`/topic/gamestate/${gameId}`, (message: any) => {
+            const data = JSON.parse(message.body);
+            onMessageReceived(data);
+        });
+    }, (error: any) => {
+        console.error("WebSocket-anslutning misslyckades: ", error);
+    });
+};
+
+export const sendMoveSocket = (gameId: number, selectedTile: any, position: any) => {
+    if (stompClient && stompClient.connected) {
+        stompClient.send(`/app/gamestate/${gameId}`, {}, JSON.stringify({ selectedTile, position }));
+    } else {
+        console.error("WebSocket-anslutning är inte aktiv");
+    }
+};
+
+export const disconnectWebSocket = () => {
+    if (stompClient) {
+        stompClient.disconnect(() => {
+            console.log("WebSocket frånkopplad");
+        });
+    }
+};
 
 export const getMove = async (gameId: number) => {
     try {

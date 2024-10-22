@@ -5,12 +5,16 @@ import { useEffect, useState, useContext } from 'react'
 import { UserLoggedInContext } from '../App';
 
 import Board from './Chessboard/Board';
-import { createBoard, joinBoard,removeBoard } from './Chessboard/ChessLogic';
+import { createBoard, joinBoard, removeBoard, connectWebSocket } from './Chessboard/ChessLogic';
 export default function Home() {
     const [allCurrentGames, setAllCururentGames] = useState<[]>([])
     const [currentGameId, setCurrentGameId] = useState<number | null>(null);
+    const [newMovementData, setNewMovementData] = useState<any>(null);
     const isLoggedIn = useContext(UserLoggedInContext);
-
+    const onMessageReceived = (data: any) => {
+        console.log(data);
+        setNewMovementData(data);
+    }
     useEffect(() => {
 
         if (getAuthToken()) {
@@ -23,13 +27,14 @@ export default function Home() {
     }, [isLoggedIn])
 
     const joingame = (gameId: number) => {
+
+        connectWebSocket(gameId, onMessageReceived)
         joinBoard(gameId)
         setCurrentGameId(gameId);
+
     }
     const createGame = () => {
-
         createBoard()
-
     }
 
 
@@ -67,7 +72,7 @@ export default function Home() {
                     ) : (
 
                         <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                            <Board gameId={currentGameId} />
+                            <Board newMovmentData={newMovementData} gameId={currentGameId} />
                         </div>
                     )}</>
             ) : (
