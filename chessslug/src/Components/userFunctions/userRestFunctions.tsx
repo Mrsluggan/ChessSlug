@@ -13,8 +13,11 @@ export const handleRegister = (firstName: string, lastName: string, login: strin
 
 export const handleLogin = (login: string, password: string) => {
     request("POST", "/login", JSON.stringify({ login, password })).then((response) => {
-        alert("du är nu inloggad!")
-        setAuthToken(response.data?.token);
+        if (response.data?.token) {
+            setAuthToken(response.data?.token);
+            alert("du är nu inloggad!")
+
+        }
     }).catch((error) => {
         console.log(error);
         setAuthToken("");

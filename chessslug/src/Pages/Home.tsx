@@ -12,14 +12,11 @@ export default function Home() {
     const isLoggedIn = useContext(UserLoggedInContext);
 
     useEffect(() => {
-        console.log(isLoggedIn);
 
         if (getAuthToken()) {
             request("GET", "/gameState/all").then((response) => {
                 setAllCururentGames(response.data);
-                console.log(response.data);
             }).catch((error) => {
-                console.log(error);
                 setAuthToken("");
             })
         }

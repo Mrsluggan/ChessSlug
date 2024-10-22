@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
 import { sendMove, getMove } from "./ChessLogic"
-
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
 interface BoardProps {
     gameId: number
 }
@@ -9,16 +10,19 @@ export default function Board({ gameId }: BoardProps) {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
     const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>([]);
     const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
+    const socket = new SockJS("http://localhost:8080/ws");
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+        stompClient.subscribe('/topic/gamestate/'+gameId, (message) => {
+            handleGetData();
+        });
+    });
 
     useEffect(() => {
         handleGetData();
     }, []);
 
-    useEffect(() => {
-        if (boardPawnsPosition.length > 0) {
-            initializeBoard();
-        }
-    }, [boardPawnsPosition]);
     const initializeBoard = () => {
         let colorCheck = false;
         let newBoardTiles = [];
@@ -36,6 +40,10 @@ export default function Board({ gameId }: BoardProps) {
         if (selectedTile && gameId) {
             let position = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
             await sendMove(gameId, selectedTile.row, selectedTile.col, position.row, position.col);
+
+            stompClient.send("/app/gamestate/" + gameId, {}, JSON.stringify({ message: "test" }));
+
+
             handleGetData();
             setBoardTiles([]);
             setSelectedTile(null);
@@ -62,7 +70,7 @@ export default function Board({ gameId }: BoardProps) {
     return (
         <>
             <div>
-
+            <button onClick={() => initializeBoard()}>Starta</button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center", justifyContent: "center" }}>
                     {boardTiles.length > 0 &&
                         boardTiles.map((color, index) => (
