@@ -5,32 +5,61 @@ import { useEffect, useState, useContext } from 'react'
 import { UserLoggedInContext } from '../App';
 
 import Board from './Chessboard/Board';
-import { createBoard, joinBoard, removeBoard, connectWebSocket } from './Chessboard/ChessLogic';
+import { createBoard, joinGame, removeBoard, connectToGame, connectToSocket, gameList } from './Chessboard/ChessLogic';
 export default function Home() {
-    const [allCurrentGames, setAllCururentGames] = useState<[]>([])
+    const [allCurrentGames, setAllCururentGames] = useState<any[]>([]);
     const [currentGameId, setCurrentGameId] = useState<number | null>(null);
     const [newMovementData, setNewMovementData] = useState<any>(null);
+    const [socket, setSocket] = useState<WebSocket | null>(null);
     const isLoggedIn = useContext(UserLoggedInContext);
     const onMessageReceived = (data: any) => {
         console.log(data);
+        
         setNewMovementData(data);
     }
+    const onNewGameRecived = (data: any) => {
+        setAllCururentGames((prev) => [...prev, data]);
+    }
+    const onJoiningGame = (data: any) => {
+        setCurrentGameId(data.gameId);
+    }
+    const onStartingGame = (data: any) => {
+        setAllCururentGames((prev) => [...prev, data]);
+    }
     useEffect(() => {
+        const fetchGamesAndConnect = async () => {
+            if (getAuthToken()) {
+                try {
+                    const response = await request("GET", "/gameState/all");
+                    setAllCururentGames(response.data);
 
-        if (getAuthToken()) {
-            request("GET", "/gameState/all").then((response) => {
-                setAllCururentGames(response.data);
-            }).catch((error) => {
-                setAuthToken("");
-            })
+                    await connectToSocket().then(stompClient => setSocket(stompClient))
+                } catch (error) {
+                    setAuthToken("");
+                }
+            }
         }
-    }, [isLoggedIn])
+
+        fetchGamesAndConnect();
+    }, [isLoggedIn]);
+
+
+    useEffect(() => {
+        if (socket) {
+            gameList(onNewGameRecived);
+        }
+    }, [socket]);
+
+
+
 
     const joingame = (gameId: number) => {
+        if (socket) {
+            connectToGame(gameId, onMessageReceived)
+            joinGame(gameId)
+            setCurrentGameId(gameId);
+        }
 
-        connectWebSocket(gameId, onMessageReceived)
-        joinBoard(gameId)
-        setCurrentGameId(gameId);
 
     }
     const createGame = () => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
-import { sendMove, getMove, sendMoveSocket } from "./ChessLogic"
+import { getMove, startGame, sendMoveSocket } from "./ChessLogic"
 
 
 interface BoardProps {
@@ -10,27 +10,42 @@ interface BoardProps {
 }
 export default function Board({ gameId, newMovmentData }: BoardProps) {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
-    const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>([]);
-    const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
+    const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>(
+        Array(8).fill(null).map(() => Array(8).fill({ color: "", name: "" }))
+    ); const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
+
+    const [currentPlayer, setCurrentPlayer] = useState<{ login: string, id: number, color: string }>();
+    const [playerColor, setPlayerColor] = useState<string>("white");
+
+    const [gameRunning, setGameRunning] = useState<boolean>(false);
+
+
 
 
 
     useEffect(() => {
-        handleGetData();
-    }, [gameId]);
+
+        if (newMovmentData) {
 
 
-    useEffect(() => {
-        if (newMovmentData && newMovmentData.selectedTile && newMovmentData.position) {
-            movePiece(newMovmentData.selectedTile, newMovmentData.position)
+            if (newMovmentData.startPosition && newMovmentData.endPosition) {
+                movePiece(newMovmentData.startPosition, newMovmentData.endPosition);
+            }
+            if (newMovmentData.currentPlayer && newMovmentData.gameRunning) {
+                setCurrentPlayer(newMovmentData.currentPlayer);
+                setGameRunning(newMovmentData.gameRunning);
+            }
+
+
         }
+
+
     }, [newMovmentData]);
 
     const initializeBoard = () => {
         let colorCheck = false;
         let newBoardTiles = [];
         handleGetData();
-
         for (let xIndex = 0; xIndex < 8; xIndex++) {
             for (let yIndex = 0; yIndex < 8; yIndex++) {
                 newBoardTiles.push(colorCheck ? "green" : "black");
@@ -40,28 +55,24 @@ export default function Board({ gameId, newMovmentData }: BoardProps) {
         }
         setBoardTiles(newBoardTiles);
     }
-
-    const movePiece = (fromIndex: { row: number; col: number }, toIndex: { row: number; col: number }) => {
+    const movePiece = (selectedTile: { row: number; col: number }, endPosition: { row: number; col: number }) => {
         console.log("nu körs programmet!");
 
         let updatedBoard = [...boardPawnsPosition];
-        updatedBoard[toIndex.row][toIndex.col] = updatedBoard[fromIndex.row][fromIndex.col];
-        updatedBoard[fromIndex.row][toIndex.col] = { color: "", name: "" };
+        updatedBoard[endPosition.row][endPosition.col] = updatedBoard[selectedTile.row][selectedTile.col];
+        updatedBoard[selectedTile.row][endPosition.col] = { color: "", name: "" };
 
         setBoardPawnsPosition(updatedBoard);
     }
-    const handlePawnMove = async (indexNumber: number) => {
-        if (selectedTile && gameId) {
-            let position = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
 
+    const handlePawnMove = async (indexNumber: number) => {
+        if (selectedTile && gameId && currentPlayer) {
+            let endPosition = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
 
             // todo, fixa så man kollar om movment är korrekt!
-            await sendMove(gameId, selectedTile.row, selectedTile.col, position.row, position.col);
-            sendMoveSocket(gameId, selectedTile, position)
-
+            sendMoveSocket(gameId, selectedTile, endPosition, currentPlayer)
             setSelectedTile(null);
         } else {
-            console.log("pjäsen vald!");
             let startPosition = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
             setSelectedTile(startPosition);
         }
@@ -74,24 +85,40 @@ export default function Board({ gameId, newMovmentData }: BoardProps) {
                 data.data.board.squares.forEach((element: any) => {
                     newBoardPawnsPosition.push(element)
                 });
+                setGameRunning(data.data.gameRunning);
+                setCurrentPlayer(data.data.currentPlayer);
                 setBoardPawnsPosition(newBoardPawnsPosition)
 
             }
         });
     };
 
+    const handleStartGame = () => {
+        startGame(gameId);
+        setGameRunning(true)
+        startGame(gameId);
+    }
+
+    useEffect(() => {
+        initializeBoard();
+    }, []);
+
     return (
-        <>
+        <div>
+            {gameRunning}
+
             <div>
-                <button onClick={() => initializeBoard()}>Starta</button>
+                {gameRunning && currentPlayer ? <p>{currentPlayer.login} turn</p> : <p>Waiting for host to start</p>}
+                <button onClick={handleStartGame}>Start game</button>
+            </div>
+            <div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center", justifyContent: "center" }}>
                     {boardTiles.length > 0 &&
                         boardTiles.map((color, index) => (
-                            <BoardTile handlePawnMove={handlePawnMove} key={index} color={color} tileIndex={index} initialPawn={boardPawnsPosition[Math.floor(index / 8)][index % 8]} />
+                            <BoardTile gameRunning={gameRunning} handlePawnMove={handlePawnMove} key={index} color={color} tileIndex={index} initialPawn={boardPawnsPosition[Math.floor(index / 8)][index % 8]} />
                         ))
                     }
                 </div>
             </div>
-        </>
-    )
+        </div>)
 }

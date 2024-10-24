@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { sendMove } from "./ChessLogic"
 
 interface BoardTileProps {
     color: string;
     tileIndex: number;
     initialPawn: { color: string, name: string } | null
+    gameRunning: boolean
     handlePawnMove: (indexNumber: number) => void
 }
 
-export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMove }: BoardTileProps) {
+export default function BoardTile({ color, tileIndex, initialPawn, gameRunning, handlePawnMove }: BoardTileProps) {
     const [pawn, setPawn] = useState<any | null>(null);
     const [colorCheck, setColorCheck] = useState<string>(color);
 
@@ -63,10 +63,12 @@ export default function BoardTile({ color, tileIndex, initialPawn, handlePawnMov
     }, [initialPawn]);
 
     const handleClick = () => {
-        if (pawn) {
-            setColorCheck("white");
+        if (gameRunning) {
+            if (pawn) {
+                setColorCheck("white");
+            }
+            handlePawnMove(tileIndex);
         }
-        handlePawnMove(tileIndex);
     }
 
     return (
