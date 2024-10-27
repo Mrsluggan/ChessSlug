@@ -5,10 +5,12 @@ interface BoardTileProps {
     tileIndex: number;
     initialPawn: { color: string, name: string } | null
     gameRunning: boolean
+    currentPlayer: { login: string, id: number, color: string } | null
+    player: { login: string, id: number, color: string } | null
     handlePawnMove: (indexNumber: number) => void
 }
 
-export default function BoardTile({ color, tileIndex, initialPawn, gameRunning, handlePawnMove }: BoardTileProps) {
+export default function BoardTile({ currentPlayer, player, color, tileIndex, initialPawn, gameRunning, handlePawnMove }: BoardTileProps) {
     const [pawn, setPawn] = useState<any | null>(null);
     const [colorCheck, setColorCheck] = useState<string>(color);
 
@@ -63,6 +65,11 @@ export default function BoardTile({ color, tileIndex, initialPawn, gameRunning, 
     }, [initialPawn]);
 
     const handleClick = () => {
+        if (player?.id !== currentPlayer?.id) {
+            return 
+
+        }        
+        
         if (gameRunning) {
             if (pawn) {
                 setColorCheck("white");

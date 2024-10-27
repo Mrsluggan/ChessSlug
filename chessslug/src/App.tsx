@@ -31,14 +31,16 @@ function App() {
     <div className="App" style={{ height: "100%", display: "flex", }}>
       <BrowserRouter>
         <UserLoggedInContext.Provider value={isLoggedIn}>
-          <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
-          <Routes>
 
-            <Route index element={<Home />} />
+            <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
+            <Routes>
 
-            <Route path="*" element={<> error 404</>} />
+              <Route index element={<Home />} />
 
-          </Routes>
+              <Route path="*" element={<> error 404</>} />
+
+            </Routes>
+
         </UserLoggedInContext.Provider>
 
       </BrowserRouter>

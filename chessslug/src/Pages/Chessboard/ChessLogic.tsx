@@ -5,12 +5,22 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 const socket = new SockJS("http://localhost:8080/ws");
 const stompClient = Stomp.over(socket);
+var stompFailureCallback = function (error: any) {
+    console.log('STOMP: ' + error);
+    setTimeout(connectToSocket, 10000);
+    console.log('STOMP: Reconecting in 10 seconds');
+};
 
-export const connectToGame = (gameId: number, onMessageReceived: (data: any) => void) => {
+export const connectToGame = (gameId: number, onMessageReceived: (data: any) => void, onMoveReceived: (data: any) => void) => {
 
     stompClient.subscribe(`/topic/gameState/${gameId}`, (message: any) => {
         const data = JSON.parse(message.body);
         onMessageReceived(data);
+    });
+    stompClient.subscribe(`/topic/gameState/move/${gameId}`, (message: any) => {
+        
+        const data = JSON.parse(message.body);
+        onMoveReceived(data);
     });
 
 };
@@ -19,29 +29,29 @@ export const connectToSocket = (): Promise<any> => {
         stompClient.connect({}, () => {
 
             console.log("connected");
-            resolve(stompClient); // Return the stompClient instance
+            resolve(stompClient);
 
         }, (error: any) => {
             console.error("WebSocket connection failed: ", error);
-            reject(error);  // Reject the Promise on error
-        });
+            reject(error); 
+        },stompFailureCallback);
     });
 };
 export const gameList = (onNewGameRecived: (data: any) => void) => {
-
-
-    stompClient.subscribe(`/topic/gameState/`, (message: any) => {
-
+    stompClient.subscribe(`/topic/gameState/gameList/`, (message: any) => {
+        console.log(message.body);
+        
         const data = JSON.parse(message.body);
         onNewGameRecived(data);
     });
+    
 
 };
 
 export const sendMoveSocket = (gameId: number, startPosition: any, endPosition: any, player: { login: string, id: number, color: string }) => {
-
+    
     if (stompClient && stompClient.connected) {
-        stompClient.send(`/app/gameState/${gameId}`, {}, JSON.stringify({ startPosition, endPosition, player }));
+        stompClient.send(`/app/gameState/move/${gameId}`, {}, JSON.stringify({ startPosition, endPosition, player }));
     } else {
         console.error("WebSocket-anslutning är inte aktiv");
     }
@@ -87,6 +97,7 @@ export const createBoard = async () => {
         } else {
             console.error("WebSocket-anslutning är inte aktiv");
         }
+
     } catch (error) {
         console.log(error);
     }
@@ -102,3 +113,5 @@ export const removeBoard = async (gameId: number) => {
         console.log(error);
     }
 };
+
+

@@ -36,3 +36,37 @@ code {
   margin: 0;
   cursor:pointer;
 }
+
+.game-container {
+  padding: 20px;
+}
+.choose-mode, .game-board {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+.game-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.game-item {
+  width: 300;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.player-name {
+  font-weight: bold;
+  padding-left: 10px;
+}
+.login-prompt {
+  text-align: center;
+  font-size: 1.2em;
+  color: #777;
+}
