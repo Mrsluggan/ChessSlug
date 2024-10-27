@@ -34,7 +34,7 @@ export default function Home() {
             alert("game has been removed!");
             window.location.reload();
         }
-        
+
         setBoardData(data);
     }
     const onNewGameRecived = (data: any) => {
@@ -89,16 +89,17 @@ export default function Home() {
         <div className="game-container">
             {isLoggedIn ? (
                 <>
-
-
                     {!currentGameId ? (
 
                         <div className="choose-mode">
-                            <div style={{ margin: "0", padding: "0" }}>
-                                <h2>Active Games</h2>
+                            <h2>Active Games</h2>
+
+                            <div style={{ margin: "0", padding: "0", display: "flex", justifyContent: "space-between", gap: "10px" }}>
                                 <button onClick={createBoardButton}>Create Game</button>
+                                <button onClick={createBoardButton}>Battle against Ai</button>
 
                             </div>
+
                             <div className="mode-container">
                                 {allCurrentGames.length > 0 ? (
                                     <ul className="game-list">

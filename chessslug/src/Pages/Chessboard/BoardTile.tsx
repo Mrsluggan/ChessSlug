@@ -16,7 +16,7 @@ export default function BoardTile({ currentPlayer, player, color, tileIndex, ini
 
     const handleDisplayPawn = (color: string, name: string) => {
         switch (color) {
-            case "white":
+            case "black":
                 switch (name) {
                     case "Pawn":
                         return "♙";
@@ -33,7 +33,7 @@ export default function BoardTile({ currentPlayer, player, color, tileIndex, ini
 
                 }
                 break;
-            case "black":
+            case "white":
                 switch (name) {
 
                     case "Pawn":
@@ -66,10 +66,10 @@ export default function BoardTile({ currentPlayer, player, color, tileIndex, ini
 
     const handleClick = () => {
         if (player?.id !== currentPlayer?.id) {
-            return 
+            return
 
-        }        
-        
+        }
+
         if (gameRunning) {
             if (pawn) {
                 setColorCheck("white");
@@ -77,6 +77,11 @@ export default function BoardTile({ currentPlayer, player, color, tileIndex, ini
             handlePawnMove(tileIndex);
         }
     }
+    useEffect(() => {
+
+        setColorCheck(color);
+
+    }, []);
 
     return (
         <div onClick={handleClick}

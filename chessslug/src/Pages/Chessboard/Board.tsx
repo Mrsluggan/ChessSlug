@@ -12,23 +12,30 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
     const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>(Array(8).fill(null).map(() => Array(8).fill({ color: "", name: "" }))); const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
     const [currentPlayer, setCurrentPlayer] = useState<{ login: string, id: number, color: string } | null>();
-    const [playerColor, setPlayerColor] = useState<string>("white");
-    const [players, setPlayers] = useState<{ login: string, id: number, color: string }[]>([{ login: "", id: 0, color: "" },{ login: "", id: 0, color: "" }]);
+    const [playerColor, setPlayerColor] = useState<string>("");
     const [gameRunning, setGameRunning] = useState<boolean>(false);
+    const [player, setPlayer] = useState<{ login: string, id: number, color: string }>(JSON.parse(localStorage.getItem("user") || "{}"));
 
+    const [players, setPlayers] = useState<Array<{ login: string, id: number, color: string }>>([player]);
 
-    const [player, setPlayer] = useState<{ login: string, id: number, color: string } | null>();
+    let yourMove = new Audio("/yourMove.mp3")
+    let enemyMove = new Audio("/enemyMove.mp3")
 
-    useEffect(() => {
-        const playerFromStorage = JSON.parse(localStorage.getItem("user") || "{}");
-        setPlayer(playerFromStorage);
-
-
-    }, []);
-
+    const yourMoveSound = () => {
+        yourMove.play()
+    }
+    const enemyMoveSound = () => {
+        enemyMove.play()
+    }
 
     useEffect(() => {
         if (newMovmentData) {
+            if (newMovmentData.player.id === player.id) {
+                yourMoveSound();
+            } else {
+                enemyMoveSound();
+            }
+
             if (newMovmentData.startPosition && newMovmentData.endPosition) {
                 movePiece(newMovmentData.startPosition, newMovmentData.endPosition);
             }
@@ -37,9 +44,19 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
 
     useEffect(() => {
         if (boardData) {
+
+
             setPlayers(boardData.players);
             setGameRunning(boardData.gameRunning);
             setCurrentPlayer(boardData.currentPlayer);
+
+            if (boardData.players[1]) {
+                if (boardData.players[1].id === player.id) {
+                    setPlayerColor("black");
+
+                }
+            }
+
 
         }
     }, [boardData]);
@@ -48,6 +65,10 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
         let colorCheck = false;
         let newBoardTiles = [];
         handleGetData();
+
+
+
+
         for (let xIndex = 0; xIndex < 8; xIndex++) {
             for (let yIndex = 0; yIndex < 8; yIndex++) {
                 newBoardTiles.push(colorCheck ? "green" : "black");
@@ -56,10 +77,9 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
             colorCheck = !colorCheck;
         }
         setBoardTiles(newBoardTiles);
+
     }
     const movePiece = (selectedTile: { row: number; col: number }, endPosition: { row: number; col: number }) => {
-
-        console.log("nu körs programmet!");
 
         let updatedBoard = [...boardPawnsPosition];
         updatedBoard[endPosition.row][endPosition.col] = updatedBoard[selectedTile.row][selectedTile.col];
@@ -80,6 +100,7 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
             // todo, fixa så man kollar om movment är korrekt!
             sendMoveSocket(gameId, selectedTile, endPosition, player)
             setSelectedTile(null);
+
         } else {
             let startPosition = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
             setSelectedTile(startPosition);
@@ -95,7 +116,6 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
                 data.data.board.squares.forEach((element: any) => {
                     newBoardPawnsPosition.push(element)
                 });
-
                 setGameRunning(data.data.gameRunning);
                 setCurrentPlayer(data.data.currentPlayer);
                 setBoardPawnsPosition(newBoardPawnsPosition)
@@ -110,6 +130,10 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
         startGame(gameId);
         setGameRunning(true)
         startGame(gameId);
+        if (boardData.players[1].id === player.id) {
+            setPlayerColor("black");
+
+        }
 
     }
 
@@ -118,50 +142,87 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
 
     }, [gameRunning]);
 
+
+
+    function mapTiles(
+        boardTiles: string[],
+        reverse: boolean,
+        props: { boardPawnsPosition: any[][]; player: any; currentPlayer: any; gameRunning: boolean; handlePawnMove: (indexNumber: number) => void }
+    ) {
+        const tilesToMap = reverse ? [...boardTiles].reverse() : boardTiles;
+
+        return tilesToMap.map((color, index) => {
+            const tileIndex = reverse ? boardTiles.length - 1 - index : index;
+
+            return (
+                <BoardTile
+                    key={tileIndex}
+                    color={color}
+                    tileIndex={tileIndex}
+                    initialPawn={props.boardPawnsPosition[Math.floor(tileIndex / 8)][tileIndex % 8]}
+                    player={props.player}
+                    currentPlayer={props.currentPlayer}
+                    gameRunning={props.gameRunning}
+                    handlePawnMove={props.handlePawnMove}
+                />
+            );
+        });
+    }
+
     return (
         <div>
-
-            <div>
-                {gameRunning && currentPlayer ? (
-                    <div style={{ textAlign: "center" }}>
-                        <h1>{currentPlayer.login} turn</h1>
-                    </div>
-                ) : (
-                    players.length < 2 ? (
-                        <p>Waiting for players to join</p>
-                    ) : (
-                        <button onClick={handleStartGame} disabled={gameRunning}>
-                            Start game
-                        </button>
-                    )
-                )}
-
-
-            </div>
-            <div>
-                <h3>Your opponent: {players[1]?.login}</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center", justifyContent: "center" }}>
-
-                    {boardTiles.length > 1 &&
-                        boardTiles.map((color, index) => (
-                            <BoardTile
-                                player={player ?? null} // add null check here
-                                currentPlayer={currentPlayer ?? null}
-                                gameRunning={gameRunning}
-                                handlePawnMove={handlePawnMove}
-                                key={index}
-                                color={color}
-                                tileIndex={index}
-                                initialPawn={boardPawnsPosition[Math.floor(index / 8)][index % 8]}
-                            />
-                        ))
-                    }
+            {players.length > 1 ? null : (
+                <div style={{ textAlign: "center" }}>
+                    <h2>waiting for player to join</h2>
                 </div>
-            </div>
-            <div style={{ textAlign: "right", display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-                <button>Give up</button>
-                <h3>You: {player?.login}</h3>
-            </div>
+            )}
+            {players.length < 2 ? null : (
+                <>
+                    <div>
+                        {gameRunning && currentPlayer ? (
+                            <div style={{ textAlign: "center" }}>
+                                <h1>{currentPlayer.login} turn</h1>
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: "center" }}>
+                                <h1>Waiting for host to start</h1>
+                                {player?.id === players[0].id && (
+                                    <button onClick={handleStartGame}>Start Game</button>
 
+                                )}
+                            </div>
+                        )}
+
+
+                    </div>
+
+
+                    <div>
+
+                        <h3>Your opponent: {players.find((player2) => player2.id !== player?.id)?.login}</h3>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(8, auto)", alignContent: "center", justifyContent: "center" }}>
+
+
+                            {
+                                boardTiles.length > 1 &&
+                                mapTiles(boardTiles, playerColor === "black", {
+                                    player: player ?? null,
+                                    currentPlayer: currentPlayer ?? null,
+                                    gameRunning: gameRunning,
+                                    handlePawnMove: handlePawnMove,
+                                    boardPawnsPosition: boardPawnsPosition
+                                })
+                            }
+                        </div>
+
+
+
+
+                    </div>
+                    <div style={{ textAlign: "right", display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                        <button>Give up</button>
+                        <h3>You: {player?.login}</h3>
+                    </div>
+                </>)}
         </div>)
 }
