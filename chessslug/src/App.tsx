@@ -16,7 +16,6 @@ function App() {
     if (getAuthToken()) {
       request("GET", "/gameState/all").then((response) => {
         setLoggedIn(true);
-        console.log(response.data);
       }).catch((error) => {
         console.log(error);
       })

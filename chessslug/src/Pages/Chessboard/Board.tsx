@@ -10,7 +10,8 @@ interface BoardProps {
 }
 export default function Board({ gameId, newMovmentData, boardData }: BoardProps) {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
-    const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>(Array(8).fill(null).map(() => Array(8).fill({ color: "", name: "" }))); const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
+    const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>(Array(8).fill(null).map(() => Array(8).fill({ color: "", name: "" })));
+    const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
     const [currentPlayer, setCurrentPlayer] = useState<{ login: string, id: number, color: string } | null>();
     const [playerColor, setPlayerColor] = useState<string>("");
     const [gameRunning, setGameRunning] = useState<boolean>(false);
@@ -30,12 +31,11 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
 
     useEffect(() => {
         if (newMovmentData) {
-            if (newMovmentData.player.id === player.id) {
+            if (currentPlayer?.id === player.id) {
                 yourMoveSound();
             } else {
                 enemyMoveSound();
             }
-
             if (newMovmentData.startPosition && newMovmentData.endPosition) {
                 movePiece(newMovmentData.startPosition, newMovmentData.endPosition);
             }
@@ -44,8 +44,6 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
 
     useEffect(() => {
         if (boardData) {
-
-
             setPlayers(boardData.players);
             setGameRunning(boardData.gameRunning);
             setCurrentPlayer(boardData.currentPlayer);
@@ -65,10 +63,6 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
         let colorCheck = false;
         let newBoardTiles = [];
         handleGetData();
-
-
-
-
         for (let xIndex = 0; xIndex < 8; xIndex++) {
             for (let yIndex = 0; yIndex < 8; yIndex++) {
                 newBoardTiles.push(colorCheck ? "green" : "black");
@@ -80,15 +74,14 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
 
     }
     const movePiece = (selectedTile: { row: number; col: number }, endPosition: { row: number; col: number }) => {
-
         let updatedBoard = [...boardPawnsPosition];
         updatedBoard[endPosition.row][endPosition.col] = updatedBoard[selectedTile.row][selectedTile.col];
-        updatedBoard[selectedTile.row][endPosition.col] = { color: "", name: "" };
+        updatedBoard[selectedTile.row][selectedTile.col] = { color: "", name: "" };
 
         setBoardPawnsPosition(updatedBoard);
     }
 
-    const handlePawnMove = async (indexNumber: number) => {
+    const handlePawnMove = async (indexNumber: number, isPeice: boolean) => {
 
         if (player?.id !== currentPlayer?.id) {
             return
@@ -96,13 +89,19 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
         }
         if (selectedTile && gameId && currentPlayer && player) {
             let endPosition = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
+            console.log("pjäsen flyttas från ", selectedTile, " till ", endPosition);
+
+
 
             // todo, fixa så man kollar om movment är korrekt!
             sendMoveSocket(gameId, selectedTile, endPosition, player)
             setSelectedTile(null);
 
         } else {
+
             let startPosition = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
+            console.log("pjäsen som klickades från ", startPosition, " till ", indexNumber);
+
             setSelectedTile(startPosition);
         }
 
@@ -116,6 +115,7 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
                 data.data.board.squares.forEach((element: any) => {
                     newBoardPawnsPosition.push(element)
                 });
+
                 setGameRunning(data.data.gameRunning);
                 setCurrentPlayer(data.data.currentPlayer);
                 setBoardPawnsPosition(newBoardPawnsPosition)
@@ -147,7 +147,7 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
     function mapTiles(
         boardTiles: string[],
         reverse: boolean,
-        props: { boardPawnsPosition: any[][]; player: any; currentPlayer: any; gameRunning: boolean; handlePawnMove: (indexNumber: number) => void }
+        props: { boardPawnsPosition: any[][]; player: any; currentPlayer: any; gameRunning: boolean; handlePawnMove: (indexNumber: number, isPeice: boolean) => void }
     ) {
         const tilesToMap = reverse ? [...boardTiles].reverse() : boardTiles;
 
@@ -168,6 +168,7 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
             );
         });
     }
+
 
     return (
         <div>

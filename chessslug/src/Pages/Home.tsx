@@ -58,7 +58,9 @@ export default function Home() {
 
 
     useEffect(() => {
-        connectToSocket().then(stompClient => setSocket(stompClient))
+        connectToSocket().then(stompClient => {
+            setSocket(stompClient)
+        })
     }, [isLoggedIn]);
 
 

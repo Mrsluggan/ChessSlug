@@ -10,9 +10,12 @@ export default function LoginFunction({ handleSetLoggedIn }: LoginFunctionProp) 
         let login = prompt("login")
         let password = prompt("password")
         if (login && password) {
-            handleLogin(login, password);
-            handleSetLoggedIn();
+            if (await handleLogin(login, password)) {
+                handleSetLoggedIn();
 
+            }else{
+                alert("Wrong login or password")
+            }
         }
 
 

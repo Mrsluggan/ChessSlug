@@ -5,6 +5,7 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 const socket = new SockJS("http://localhost:8080/ws");
 const stompClient = Stomp.over(socket);
+stompClient.debug = f => f;
 var stompFailureCallback = function (error: any) {
     console.log('STOMP: ' + error);
     setTimeout(connectToSocket, 10000);

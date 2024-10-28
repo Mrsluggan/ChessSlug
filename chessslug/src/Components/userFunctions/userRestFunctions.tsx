@@ -14,22 +14,24 @@ export const handleRegister = (firstName: string, lastName: string, login: strin
     })
 };
 
-export const handleLogin = (login: string, password: string) => {
-    request("POST", "/login", JSON.stringify({ login, password })).then((response) => {
-        if (response.data?.token) {
-            setAuthToken(response.data?.token);
-            setUser(response.data);
-            window.location.reload();
-
-            alert("du är nu inloggad!")
-
-        }
-    }).catch((error) => {
-        console.log(error);
-        localStorage.clear();
-    })
+export const handleLogin = (login: string, password: string): Promise<boolean> => {
+    return request("POST", "/login", JSON.stringify({ login, password }))
+        .then((response) => {
+            if (response.data?.token) {
+                setAuthToken(response.data?.token);
+                setUser(response.data);
+                return true;
+            } else {
+                localStorage.clear();
+                return false;
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+            localStorage.clear();
+            return false;
+        });
 };
-
 
 export const handleLogout = () => {
     window.location.reload();

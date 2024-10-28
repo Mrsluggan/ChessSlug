@@ -7,7 +7,7 @@ interface BoardTileProps {
     gameRunning: boolean
     currentPlayer: { login: string, id: number, color: string } | null
     player: { login: string, id: number, color: string } | null
-    handlePawnMove: (indexNumber: number) => void
+    handlePawnMove: (indexNumber: number, isPeice: boolean) => void
 }
 
 export default function BoardTile({ currentPlayer, player, color, tileIndex, initialPawn, gameRunning, handlePawnMove }: BoardTileProps) {
@@ -67,21 +67,18 @@ export default function BoardTile({ currentPlayer, player, color, tileIndex, ini
     const handleClick = () => {
         if (player?.id !== currentPlayer?.id) {
             return
-
         }
-
         if (gameRunning) {
             if (pawn) {
                 setColorCheck("white");
+
             }
-            handlePawnMove(tileIndex);
+
+
+            handlePawnMove(tileIndex, pawn !== null);
         }
     }
-    useEffect(() => {
 
-        setColorCheck(color);
-
-    }, []);
 
     return (
         <div onClick={handleClick}
