@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
-import { getMove, startGame, sendMoveSocket } from "./ChessLogic"
+import { getMove, startGame, sendMoveSocket, sendMoveToAi } from "./ChessLogic"
 
 
 interface BoardProps {
     gameId: number,
     newMovmentData: any
     boardData: any
+    gamemode: string;
 }
-export default function Board({ gameId, newMovmentData, boardData }: BoardProps) {
+export default function Board({ gameId, newMovmentData, boardData, gamemode }: BoardProps) {
     const [boardTiles, setBoardTiles] = useState<Array<string>>([]);
     const [boardPawnsPosition, setBoardPawnsPosition] = useState<({ color: string, name: string })[][]>(Array(8).fill(null).map(() => Array(8).fill({ color: "", name: "" })));
     const [selectedTile, setSelectedTile] = useState<{ row: number; col: number } | null>(null);
@@ -16,7 +17,6 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
     const [playerColor, setPlayerColor] = useState<string>("");
     const [gameRunning, setGameRunning] = useState<boolean>(false);
     const [player, setPlayer] = useState<{ login: string, id: number, color: string }>(JSON.parse(localStorage.getItem("user") || "{}"));
-
     const [players, setPlayers] = useState<Array<{ login: string, id: number, color: string }>>([player]);
 
     let yourMove = new Audio("/yourMove.mp3")
@@ -92,7 +92,7 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
             console.log("pjäsen flyttas från ", selectedTile, " till ", endPosition);
 
 
-
+            sendMoveToAi(gameId, boardPawnsPosition)
             // todo, fixa så man kollar om movment är korrekt!
             sendMoveSocket(gameId, selectedTile, endPosition, player)
             setSelectedTile(null);
@@ -130,19 +130,30 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
         startGame(gameId);
         setGameRunning(true)
         startGame(gameId);
-        if (boardData.players[1].id === player.id) {
-            setPlayerColor("black");
+        if (gamemode !== "aimode") {
+            if (boardData.players[1].id === player.id) {
+                setPlayerColor("black");
 
+            }
         }
 
+
     }
+
 
     useEffect(() => {
         initializeBoard();
 
     }, [gameRunning]);
 
+    useEffect(() => {
+        if (gamemode === "aimode") {
 
+            setPlayers([...players, { id: 0, login: "AI", color: "black" }])
+            console.log(players);
+
+        }
+    }, []);
 
     function mapTiles(
         boardTiles: string[],
@@ -188,8 +199,9 @@ export default function Board({ gameId, newMovmentData, boardData }: BoardProps)
                             <div style={{ textAlign: "center" }}>
                                 <h1>Waiting for host to start</h1>
                                 {player?.id === players[0].id && (
-                                    <button onClick={handleStartGame}>Start Game</button>
-
+                                    <div>
+                                        <button onClick={handleStartGame}>Start Game</button>
+                                    </div>
                                 )}
                             </div>
                         )}

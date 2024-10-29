@@ -1,12 +1,13 @@
 import React from 'react'
-import { request, setAuthToken, getAuthToken } from "./../axios_helper"
+import { request, getUser, getAuthToken } from "./../axios_helper"
 
 import { useEffect, useState, useContext } from 'react'
 import { UserLoggedInContext } from '../App';
 
 import Board from './Chessboard/Board';
-import { createBoard, joinGame, removeBoard, connectToGame, connectToSocket, gameList } from './Chessboard/ChessLogic';
+import { createBoard, joinGame, removeBoard, connectToGame, connectToSocket, gameList, connectToAiGame } from './Chessboard/ChessLogic';
 import { create } from 'domain';
+import { join } from 'path';
 export default function Home() {
     const [allCurrentGames, setAllCururentGames] = useState<any[]>([]);
     const [currentGameId, setCurrentGameId] = useState<number | null>(null);
@@ -14,6 +15,7 @@ export default function Home() {
     const [socket, setSocket] = useState<WebSocket | null>(null);
     const [boardData, setBoardData] = useState<any>(null);
     const isLoggedIn = useContext(UserLoggedInContext);
+    const [gamemode, setGamemode] = useState<string>("");
 
     const fetchGames = async () => {
         if (getAuthToken()) {
@@ -40,15 +42,20 @@ export default function Home() {
     const onNewGameRecived = (data: any) => {
         setAllCururentGames((prev) => [...prev, data]);
     }
-    const onStartingGame = (data: any) => {
-        setAllCururentGames((prev) => [...prev, data]);
-    }
+
     const onMoveReceived = (data: any) => {
         setNewMovementData(data);
     }
+    const onAiGameUpdate = (data: any) => {
+        console.log(data);
+    }
+    const onAiMoveUpdate = (data: any) => {
+        console.log(data);
 
+    }
     const joinGameButton = (gameId: number) => {
         if (socket) {
+            setGamemode("regularmode");
             connectToGame(gameId, onMessageReceived, onMoveReceived)
             joinGame(gameId)
             setCurrentGameId(gameId);
@@ -65,13 +72,18 @@ export default function Home() {
 
 
     const createBoardButton = () => {
-        if (socket) {
-            createBoard()
+        createBoard();
 
+    }
+    const handleAiButton = async () => {
+        let userName = getUser()
+        if (socket && userName) {
+            setGamemode("aimode")
+            let gameId = await connectToAiGame(userName,onAiGameUpdate, onAiMoveUpdate)
+            setCurrentGameId(gameId);
         }
 
     }
-
     const removeBoardButton = (gameId: number) => {
         setAllCururentGames(prevGames => prevGames.filter(game => game.id !== gameId));
         removeBoard(gameId);
@@ -98,7 +110,7 @@ export default function Home() {
 
                             <div style={{ margin: "0", padding: "0", display: "flex", justifyContent: "space-between", gap: "10px" }}>
                                 <button onClick={createBoardButton}>Create Game</button>
-                                <button onClick={createBoardButton}>Battle against Ai</button>
+                                <button onClick={handleAiButton}>Battle against Ai</button>
 
                             </div>
 
@@ -122,7 +134,7 @@ export default function Home() {
                         </div>
                     ) : (
                         <div className="game-board">
-                            <Board boardData={boardData} newMovmentData={newMovementData} gameId={currentGameId} />
+                            <Board gamemode={gamemode} boardData={boardData} newMovmentData={newMovementData} gameId={currentGameId} />
                         </div>
                     )}
                 </>

@@ -1,8 +1,6 @@
 import React from 'react'
-import { request, setAuthToken } from '../../axios_helper';
-const setUser = (user: { login: string, firstName: string, lastName: string }) => {
-    localStorage.setItem("user", JSON.stringify(user));
-}
+import { request, setAuthToken,setUser } from '../../axios_helper';
+
 
 export const handleRegister = (firstName: string, lastName: string, login: string, password: string) => {
     request("POST", "/register", JSON.stringify({ firstName, lastName, login, password })).then((data) => {
