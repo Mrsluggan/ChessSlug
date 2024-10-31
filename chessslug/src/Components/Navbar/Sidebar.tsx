@@ -16,7 +16,7 @@ export default function Sidebar({ handleSetLoggedIn }: SidebarProps) {
         handleLogout();
         handleSetLoggedIn();
     }
-    
+
     return (
         <div style={{ backgroundColor: "#1c1c1e", height: "100vh", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div className='upperSidebar'>
@@ -24,7 +24,7 @@ export default function Sidebar({ handleSetLoggedIn }: SidebarProps) {
                 <ul style={{ listStyle: "none", gap: "10px", display: "flex", flexDirection: "column", textAlign: "left", padding: "0", marginLeft: "10%" }}>
                     {!isLoggedIn ? (
                         <div>
-                            <LoginFunction handleSetLoggedIn = {handleSetLoggedIn} />
+                            <LoginFunction handleSetLoggedIn={handleSetLoggedIn} />
                             <Register />
                         </div>
                     ) : (
@@ -35,6 +35,7 @@ export default function Sidebar({ handleSetLoggedIn }: SidebarProps) {
                     <li>Spela</li>
                     <li>Vänner</li>
                     <li>Lär dig</li>
+                    <li>Affär</li>
 
 
 

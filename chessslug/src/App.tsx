@@ -31,14 +31,14 @@ function App() {
       <BrowserRouter>
         <UserLoggedInContext.Provider value={isLoggedIn}>
 
-            <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
-            <Routes>
+          <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
+          <Routes>
 
-              <Route index element={<Home />} />
+            <Route index element={<Home />} />
 
-              <Route path="*" element={<> error 404</>} />
+            <Route path="*" element={<> error 404</>} />
 
-            </Routes>
+          </Routes>
 
         </UserLoggedInContext.Provider>
 

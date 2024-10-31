@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
-import { getMove, startGame, sendMoveSocket, sendMoveToAi } from "./ChessLogic"
+import { getMove, startGame, sendMoveSocket, sendToAiGame } from "./ChessLogic"
 
 
 interface BoardProps {
@@ -57,6 +57,7 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
 
 
         }
+
     }, [boardData]);
 
     const initializeBoard = () => {
@@ -92,9 +93,23 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
             console.log("pjäsen flyttas från ", selectedTile, " till ", endPosition);
 
 
-            sendMoveToAi(gameId, boardPawnsPosition)
             // todo, fixa så man kollar om movment är korrekt!
-            sendMoveSocket(gameId, selectedTile, endPosition, player)
+            if (gamemode === "aimode") {
+                
+                const moveSuccess = await sendMoveSocket(gameId, selectedTile, endPosition, player);
+
+                if (moveSuccess) {
+                    console.log("nu skickas det");
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    sendToAiGame(gameId);
+                }
+
+            }else{
+                sendMoveSocket(gameId, selectedTile, endPosition, player)
+
+            }
+
             setSelectedTile(null);
 
         } else {
@@ -111,6 +126,7 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
         getMove(gameId).then((data: any) => {
 
             if (data) {
+
                 let newBoardPawnsPosition: any[] = [];
                 data.data.board.squares.forEach((element: any) => {
                     newBoardPawnsPosition.push(element)

@@ -36,6 +36,7 @@ export default function Home() {
             alert("game has been removed!");
             window.location.reload();
         }
+        console.log("här kommer lite data");
 
         setBoardData(data);
     }
@@ -46,13 +47,7 @@ export default function Home() {
     const onMoveReceived = (data: any) => {
         setNewMovementData(data);
     }
-    const onAiGameUpdate = (data: any) => {
-        console.log(data);
-    }
-    const onAiMoveUpdate = (data: any) => {
-        console.log(data);
 
-    }
     const joinGameButton = (gameId: number) => {
         if (socket) {
             setGamemode("regularmode");
@@ -79,7 +74,7 @@ export default function Home() {
         let userName = getUser()
         if (socket && userName) {
             setGamemode("aimode")
-            let gameId = await connectToAiGame(userName,onAiGameUpdate, onAiMoveUpdate)
+            let gameId = await connectToAiGame(userName, onMoveReceived, onMoveReceived)
             setCurrentGameId(gameId);
         }
 
