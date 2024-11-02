@@ -1,15 +1,7 @@
-# Base image
+# Use Node.js for building the app
 FROM node:14 AS builder
-WORKDIR /chessslug
 
-# Copy files and install dependencies
-COPY . .
+COPY package.json package-lock.json ./
 RUN npm install
-
-# Run build
+COPY . .
 RUN npm run build
-
-# Production image
-FROM node:14
-WORKDIR /app
-COPY --from=builder /app/build /app/build
