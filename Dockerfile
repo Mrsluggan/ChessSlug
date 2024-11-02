@@ -1,6 +1,6 @@
 # Base image
 FROM node:14 AS builder
-WORKDIR /app
+WORKDIR /chessslug
 
 # Copy files and install dependencies
 COPY . .
