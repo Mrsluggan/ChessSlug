@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BoardTile from './BoardTile';
-import { getMove, startGame, sendMoveSocket, sendToAiGame } from "./ChessLogic"
+import { getMove, startGame, sendMoveSocket, sendToAiGame, removeBoard } from "./ChessLogic"
 
 
 interface BoardProps {
@@ -31,6 +31,7 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
 
     useEffect(() => {
         if (newMovmentData) {
+
             if (currentPlayer?.id === player.id) {
                 yourMoveSound();
             } else {
@@ -48,7 +49,7 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
             setGameRunning(boardData.gameRunning);
             setCurrentPlayer(boardData.currentPlayer);
 
-            if (boardData.players[1]) {
+            if (boardData.players[1] != null) {
                 if (boardData.players[1].id === player.id) {
                     setPlayerColor("black");
 
@@ -90,12 +91,11 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
         }
         if (selectedTile && gameId && currentPlayer && player) {
             let endPosition = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
-            console.log("pjäsen flyttas från ", selectedTile, " till ", endPosition);
 
 
             // todo, fixa så man kollar om movment är korrekt!
             if (gamemode === "aimode") {
-                
+
                 const moveSuccess = await sendMoveSocket(gameId, selectedTile, endPosition, player);
 
                 if (moveSuccess) {
@@ -105,7 +105,9 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
                     sendToAiGame(gameId);
                 }
 
-            }else{
+            } else {
+                console.log("nu skickas draget");
+
                 sendMoveSocket(gameId, selectedTile, endPosition, player)
 
             }
@@ -115,7 +117,6 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
         } else {
 
             let startPosition = { row: Math.floor(indexNumber / 8), col: indexNumber % 8 };
-            console.log("pjäsen som klickades från ", startPosition, " till ", indexNumber);
 
             setSelectedTile(startPosition);
         }
@@ -166,7 +167,6 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
         if (gamemode === "aimode") {
 
             setPlayers([...players, { id: 0, login: "AI", color: "black" }])
-            console.log(players);
 
         }
     }, []);
@@ -195,7 +195,9 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
             );
         });
     }
-
+    const giveUpButton = (gameId: number) => {
+        removeBoard(gameId);
+    }
 
     return (
         <div>
@@ -249,7 +251,7 @@ export default function Board({ gameId, newMovmentData, boardData, gamemode }: B
 
                     </div>
                     <div style={{ textAlign: "right", display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-                        <button>Give up</button>
+                        <button onClick={() => giveUpButton(gameId)}>Give up</button>
                         <h3>You: {player?.login}</h3>
                     </div>
                 </>)}

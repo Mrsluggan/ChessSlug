@@ -6,9 +6,12 @@ import { UserLoggedInContext } from '../App';
 
 import Board from './Chessboard/Board';
 import { createBoard, joinGame, removeBoard, connectToGame, connectToSocket, gameList, connectToAiGame } from './Chessboard/ChessLogic';
-import { create } from 'domain';
-import { join } from 'path';
-export default function Home() {
+import LoginForm from '../Components/LoginForm/LoginForm';
+interface LoginFormProps {
+    handleSetLoggedIn: () => void;
+}
+
+export default function Home({ handleSetLoggedIn }: LoginFormProps) {
     const [allCurrentGames, setAllCururentGames] = useState<any[]>([]);
     const [currentGameId, setCurrentGameId] = useState<number | null>(null);
     const [newMovementData, setNewMovementData] = useState<any>(null);
@@ -21,6 +24,8 @@ export default function Home() {
         if (getAuthToken()) {
             try {
                 const response = await request("GET", "/gameState/all");
+                console.log(response.data);
+
                 setAllCururentGames(response.data);
 
             } catch (error) {
@@ -30,17 +35,20 @@ export default function Home() {
     }
 
     const onMessageReceived = (data: any) => {
-        if (data.removed) {
+        console.log(data);
+
+        // måste hitta bättre lösing? va fan är detta
+        if (data === '{"removed":"true"}') {
             setBoardData(null);
             setCurrentGameId(null);
             alert("game has been removed!");
             window.location.reload();
         }
-        console.log("här kommer lite data");
 
         setBoardData(data);
     }
     const onNewGameRecived = (data: any) => {
+
         setAllCururentGames((prev) => [...prev, data]);
     }
 
@@ -62,11 +70,13 @@ export default function Home() {
     useEffect(() => {
         connectToSocket().then(stompClient => {
             setSocket(stompClient)
+
         })
     }, [isLoggedIn]);
 
 
     const createBoardButton = () => {
+
         createBoard();
 
     }
@@ -86,7 +96,6 @@ export default function Home() {
     useEffect(() => {
         if (socket) {
             gameList(onNewGameRecived);
-
             fetchGames();
         }
     }, [socket]);
@@ -99,26 +108,35 @@ export default function Home() {
             {isLoggedIn ? (
                 <>
                     {!currentGameId ? (
-
                         <div className="choose-mode">
                             <h2>Active Games</h2>
-
-                            <div style={{ margin: "0", padding: "0", display: "flex", justifyContent: "space-between", gap: "10px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: "10px" }}>
                                 <button onClick={createBoardButton}>Create Game</button>
                                 <button onClick={handleAiButton}>Battle against Ai</button>
-
                             </div>
-
                             <div className="mode-container">
                                 {allCurrentGames.length > 0 ? (
                                     <ul className="game-list">
                                         {allCurrentGames.map((game, index) => (
                                             <li key={index} className="game-item">
-                                                Chess Game
-                                                <button onClick={() => joinGameButton(game.id)}>Join</button>
-                                                <div>Players:</div>
+                                                {game.gameStateName}'s Game <br />
+                                                {game.players.length < 2 ? (
+                                                    <button onClick={() => joinGameButton(game.id)}>Join</button>
+                                                ) : (
+                                                    <>Game is full</>
+                                                )}
+                                                <div style={{ display: "flex" }}>Players:
 
-                                                <button onClick={() => removeBoardButton(game.id)}>Remove Board</button>
+                                                    {game.players.map((players: any, index: number) => (
+                                                        <div key={index}>
+                                                            {players.login}
+                                                        </div>
+                                                    ))}
+
+                                                </div>
+                                                {game.gameStateName === getUser() && (
+                                                    <button onClick={() => removeBoardButton(game.id)}>Remove Game</button>
+                                                )}
                                             </li>
                                         ))}
                                     </ul>
@@ -134,7 +152,7 @@ export default function Home() {
                     )}
                 </>
             ) : (
-                <div className="login-prompt">Please log in to access the game</div>
+                <div className="login-prompt"><LoginForm handleSetLoggedIn={handleSetLoggedIn} /></div>
             )}
         </div>
 

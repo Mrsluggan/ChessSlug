@@ -7,7 +7,10 @@ body {
   font-size: 30px;
   overflow: hidden;
 }
-
+a {
+  text-decoration: none;
+  color: #f1f1f1;
+} 
 button {
 
   cursor: pointer;
@@ -21,13 +24,15 @@ button:hover {
 
 li:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   cursor: pointer;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+.App-header {
+  	background-size: cover;
 }
 
 .BoardTile {
@@ -38,7 +43,8 @@ code {
 }
 
 .game-container {
-  padding: 20px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .choose-mode, .game-board {
   display: flex;
@@ -66,7 +72,27 @@ code {
   padding-left: 10px;
 }
 .login-prompt {
+  margin-top: 20px;
   text-align: center;
   font-size: 1.2em;
   color: #777;
+}
+
+button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #3e8e41;
 }

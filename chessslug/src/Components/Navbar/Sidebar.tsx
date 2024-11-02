@@ -22,20 +22,16 @@ export default function Sidebar({ handleSetLoggedIn }: SidebarProps) {
             <div className='upperSidebar'>
                 <strong>Slugchess</strong>
                 <ul style={{ listStyle: "none", gap: "10px", display: "flex", flexDirection: "column", textAlign: "left", padding: "0", marginLeft: "10%" }}>
-                    {!isLoggedIn ? (
-                        <div>
-                            <LoginFunction handleSetLoggedIn={handleSetLoggedIn} />
-                            <Register />
-                        </div>
-                    ) : (
+                    {isLoggedIn && (
                         <button onClick={handleButton}>Logga ut</button>
+
                     )}
 
-
-                    <li>Spela</li>
-                    <li>Vänner</li>
-                    <li>Lär dig</li>
-                    <li>Affär</li>
+                    
+                    <li><a href="/">Spela</a></li>
+                    <li><a href="/friends">Vänner</a></li>
+                    <li><a href="/learn">Lär dig</a></li>
+                    <li><a href="/store">Affär</a></li>
 
 
 

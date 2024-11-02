@@ -17,12 +17,12 @@ export const connectToGame = (gameId: number, onMessageReceived: (data: any) => 
 
     stompClient.subscribe(`/topic/gameState/${gameId}`, (message: any) => {
         const data = JSON.parse(message.body);
-        onMessageReceived(data);
+        onMessageReceived(data.body);
     });
     stompClient.subscribe(`/topic/gameState/move/${gameId}`, (message: any) => {
 
         const data = JSON.parse(message.body);
-        onMoveReceived(data);
+        onMoveReceived(data.body);
     });
 
 
@@ -38,12 +38,12 @@ export const connectToAiGame = async (username: string, onMessageReceived: (data
 
         stompClient.subscribe(`/topic/gameState/${gameId}`, (message: any) => {
             const data = JSON.parse(message.body);
-            onMessageReceived(data);
+            onMessageReceived(data.body);
         });
         stompClient.subscribe(`/topic/gameState/move/${gameId}`, (message: any) => {
 
             const data = JSON.parse(message.body);
-            onMoveReceived(data);
+            onMoveReceived(data.body);
         });
     }
     return gameId;
@@ -66,9 +66,8 @@ export const connectToSocket = (): Promise<any> => {
 };
 export const gameList = (onNewGameRecived: (data: any) => void) => {
     stompClient.subscribe(`/topic/gameState/gameList/`, (message: any) => {
-        console.log(message.body);
         const data = JSON.parse(message.body);
-        onNewGameRecived(data);
+        onNewGameRecived(data.body);
     });
 
 
@@ -77,9 +76,8 @@ export const gameList = (onNewGameRecived: (data: any) => void) => {
 export const sendMoveSocket = (gameId: number, startPosition: any, endPosition: any, player: { login: string, id: number, color: string }): Promise<boolean> => {
     return new Promise((resolve, reject) => {
         if (stompClient && stompClient.connected) {
-            stompClient.send(`/app/gameState/move/${gameId}`, {}, JSON.stringify({token: getAuthToken, startPosition, endPosition, player }));
-            console.log("true!");
-            
+            stompClient.send(`/app/gameState/move/${gameId}`, {}, JSON.stringify({ startPosition, endPosition, player, token: getAuthToken }));
+
             resolve(true);
         } else {
             console.error("WebSocket-anslutning är inte aktiv");
@@ -91,7 +89,7 @@ export const sendMoveSocket = (gameId: number, startPosition: any, endPosition: 
 export const sendToAiGame = (gameId: number) => {
 
     if (stompClient && stompClient.connected) {
-        stompClient.send(`/app/gameState/aiMove/${gameId}`, {},  JSON.stringify({ token: getAuthToken() }));
+        stompClient.send(`/app/gameState/aiMove/${gameId}`, {}, JSON.stringify({ token: getAuthToken() }));
 
     } else {
         console.error("WebSocket-anslutning är inte aktiv");
@@ -115,7 +113,7 @@ export const getMove = async (gameId: number) => {
     }
 };
 
-export const startGame = async (gameId: number ) => {
+export const startGame = async (gameId: number) => {
     if (stompClient && stompClient.connected) {
         stompClient.send(`/app/gameState/start/${gameId}`, {}, JSON.stringify({ token: getAuthToken() }));
     } else {
@@ -131,6 +129,7 @@ export const joinGame = async (gameId: number) => {
 };
 
 export const createBoard = async () => {
+
     try {
 
         if (stompClient && stompClient.connected) {
@@ -148,7 +147,7 @@ export const createBoard = async () => {
 
 export const removeBoard = async (gameId: number) => {
     try {
-        const response = await request("DELETE", `/gameState/${gameId}`,  JSON.stringify({ token: getAuthToken() }));
+        const response = await request("DELETE", `/gameState/${gameId}`, JSON.stringify({ token: getAuthToken() }));
         return response;
     } catch (error) {
         console.log(error);

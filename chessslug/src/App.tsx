@@ -6,6 +6,9 @@ import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import Home from './Pages/Home';
 import Sidebar from './Components/Navbar/Sidebar';
 import { getAuthToken, request } from './axios_helper';
+import Shop from './Pages/Shop';
+import Learn from './Pages/Learn';
+import Header from './Components/Header/Header';
 export const UserLoggedInContext = createContext(false);
 
 function App() {
@@ -32,14 +35,17 @@ function App() {
         <UserLoggedInContext.Provider value={isLoggedIn}>
 
           <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
-          <Routes>
+          <div style={{display: "flex", flexDirection: "column", width: "100%"}}>
+            <Header />
+            <Routes>
+              <Route index element={<Home handleSetLoggedIn={handleSetLoggedIn} />} />
+              <Route path="/store" element={<Shop />} />
+              <Route path="/learn" element={<Learn />} />
 
-            <Route index element={<Home />} />
+              <Route path="*" element={<> error 404</>} />
 
-            <Route path="*" element={<> error 404</>} />
-
-          </Routes>
-
+            </Routes>
+          </div>
         </UserLoggedInContext.Provider>
 
       </BrowserRouter>
