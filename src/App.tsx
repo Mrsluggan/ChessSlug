@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from 'react';
-import { Routes, Route, HashRouter as Router } from 'react-router-dom';
+import { Routes, Route, Router } from 'react-router-dom';
 
 import Home from './Pages/Home';
 import Sidebar from './Components/Navbar/Sidebar';
@@ -29,7 +29,6 @@ function App() {
 
   return (
     <div className="App" style={{ height: "100%", display: "flex" }}>
-      <Router>
         <UserLoggedInContext.Provider value={isLoggedIn}>
           <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
           <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
@@ -42,7 +41,6 @@ function App() {
             </Routes>
           </div>
         </UserLoggedInContext.Provider>
-      </Router>
     </div>
   );
 }
