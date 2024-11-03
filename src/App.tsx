@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from 'react';
-import { HashRouter as BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 
 import Home from './Pages/Home';
 import Sidebar from './Components/Navbar/Sidebar';
@@ -30,7 +30,7 @@ function App() {
   return (
     <div className="App" style={{ height: "100%", display: "flex" }}>
       <UserLoggedInContext.Provider value={isLoggedIn}>
-        <BrowserRouter>
+        <HashRouter>
           <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
           <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <Header />
@@ -41,7 +41,7 @@ function App() {
               <Route path="*" element={<div>error 404</div>} />
             </Routes>
           </div>
-        </BrowserRouter>
+        </HashRouter>
       </UserLoggedInContext.Provider>
     </div>
   );
