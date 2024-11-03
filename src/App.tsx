@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from 'react';
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter as BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Home from './Pages/Home';
 import Sidebar from './Components/Navbar/Sidebar';
