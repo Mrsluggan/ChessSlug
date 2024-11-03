@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { request } from '../axios_helper';
+import React, { useEffect, useState } from 'react';
 
 // Typ för ett skin
 interface Skin {
-    id: number;
+    id: string; // Changed to string to match Stripe product IDs
     name: string;
-    price: number;
+    price: number; // You can store price as number for calculation
     imageUrl: string;
-    priceId: string; // Add priceId here to associate with Stripe
 }
 
 // Typ för ett kundvagnsobjekt
@@ -16,21 +14,39 @@ interface CartItem {
     quantity: number;
 }
 
-// Skin-data (som exempel)
-const skins: Skin[] = [
-    { id: 1, name: "Halloween Wonders", price: 50, imageUrl: "https://userstyles.org/style_screenshots/260526_after.png?r=1730102411", priceId: "price_1HXXXX" },
-    { id: 2, name: "Pro Gamer", price: 70, imageUrl: "https://userstyles.org/style_screenshots/261889_after.png?r=1730361617", priceId: "price_1HXXXX" },
-    { id: 3, name: "Rich", price: 60, imageUrl: "https://userstyles.org/style_screenshots/260672_after.png?r=1730361668", priceId: "price_1HXXXX" },
-];
-
 export default function Shop() {
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [skins, setSkins] = useState<Skin[]>([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch('/api/products');
+                const data = await response.json();
+
+                // Map product data to Skin format
+                const skinData: Skin[] = data.flatMap((product: { prices: any[]; id: any; name: any; images: any[]; }) => 
+                    product.prices.map((price: { unit_amount: number; }) => ({
+                        id: product.id,
+                        name: product.name,
+                        price: price.unit_amount / 100, // Stripe stores prices in cents
+                        imageUrl: product.images[0], // Assuming the first image is the primary
+                    }))
+                );
+
+                setSkins(skinData);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     const addToCart = (skin: Skin) => {
         setCart((prevCart) => {
             const existingItem = prevCart.find(item => item.skin.id === skin.id);
             if (existingItem) {
-                // Om skin redan finns i kundvagnen, öka antal
                 return prevCart.map(item =>
                     item.skin.id === skin.id
                         ? { ...item, quantity: item.quantity + 1 }
@@ -41,25 +57,29 @@ export default function Shop() {
         });
     };
 
-    const removeFromCart = (skinId: number) => {
+    const removeFromCart = (skinId: string) => {
         setCart((prevCart) => prevCart.filter(item => item.skin.id !== skinId));
     };
 
-    // Beräkna totalpris
     const calculateTotal = () => {
         return cart.reduce((total, item) => total + item.skin.price * item.quantity, 0);
     };
 
     const handleCheckout = async (priceId: string) => {
         try {
-            const response = await request('POST', 'https://mrsluggan.github.io/api/payments/create-checkout-session', { priceId });
+            const response = await fetch('/api/payments/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ priceId }),
+            });
 
-            if (!response) {
+            if (!response.ok) {
                 throw new Error('Failed to create checkout session');
             }
 
-            const sessionUrl = await (response as any).text();
-            // Redirect the user to the Stripe Checkout page
+            const sessionUrl = await response.text();
             window.location.href = sessionUrl;
 
         } catch (error) {
@@ -82,12 +102,10 @@ export default function Shop() {
                             <h3>{skin.name}</h3>
                             <div>
                                 <p>Price: ${skin.price}</p>
-                                <button onClick={() => addToCart(skin)}>Buy Now</button>
+                                <button onClick={() => handleCheckout(skin.id)}>Buy Now</button>
                             </div>
                         </div>
                     ))}
-                </div>
-                <div style={{ listStyle: 'none', marginTop: '30px' }}>
                 </div>
                 <hr />
             </div>
@@ -109,11 +127,8 @@ export default function Shop() {
                                     </div>
                                 ))}
                             </div>
-                            <div>
                             <h3>Total: ${calculateTotal()}</h3>
-                            <button onClick={() => handleCheckout(cart[0].skin.priceId)}>Checkout</button> {/* Checkout button, using the first item's priceId */}
-                            </div>
-                            
+                            <button onClick={() => handleCheckout(cart[0].skin.id)}>Checkout</button>
                         </>
                     ) : (
                         <p>Your cart is empty.</p>
