@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { request } from '../axios_helper';
 
 // Typ för ett skin
 interface Skin {
@@ -6,6 +7,7 @@ interface Skin {
     name: string;
     price: number;
     imageUrl: string;
+    priceId: string; // Add priceId here to associate with Stripe
 }
 
 // Typ för ett kundvagnsobjekt
@@ -16,9 +18,9 @@ interface CartItem {
 
 // Skin-data (som exempel)
 const skins: Skin[] = [
-    { id: 1, name: "Hallowen wonders", price: 50, imageUrl: "https://userstyles.org/style_screenshots/260526_after.png?r=1730102411" },
-    { id: 2, name: "Pro gamer", price: 70, imageUrl: "https://userstyles.org/style_screenshots/261889_after.png?r=1730361617" },
-    { id: 3, name: "Rich", price: 60, imageUrl: "https://userstyles.org/style_screenshots/260672_after.png?r=1730361668" },
+    { id: 1, name: "Halloween Wonders", price: 50, imageUrl: "https://userstyles.org/style_screenshots/260526_after.png?r=1730102411", priceId: "price_1HXXXX" },
+    { id: 2, name: "Pro Gamer", price: 70, imageUrl: "https://userstyles.org/style_screenshots/261889_after.png?r=1730361617", priceId: "price_1HXXXX" },
+    { id: 3, name: "Rich", price: 60, imageUrl: "https://userstyles.org/style_screenshots/260672_after.png?r=1730361668", priceId: "price_1HXXXX" },
 ];
 
 export default function Shop() {
@@ -48,13 +50,29 @@ export default function Shop() {
         return cart.reduce((total, item) => total + item.skin.price * item.quantity, 0);
     };
 
+    const handleCheckout = async (priceId: string) => {
+        try {
+            const response = await request('POST', 'https://mrsluggan.github.io/api/payments/create-checkout-session', { priceId });
+
+            if (!response) {
+                throw new Error('Failed to create checkout session');
+            }
+
+            const sessionUrl = await (response as any).text();
+            // Redirect the user to the Stripe Checkout page
+            window.location.href = sessionUrl;
+
+        } catch (error) {
+            console.error('Error during checkout:', error);
+        }
+    };
+
     return (
         <div style={{ fontSize: '20px', display: 'flex', gap: '60px' }}>
             <div style={{ margin: '20px' }}>
                 <h1>Battlepass coming soon!</h1>
-
                 <hr />
-                <h2>Tired of the same old boardcolor? </h2>
+                <h2>Tired of the same old board color?</h2>
                 <p>Try one of these!</p>
                 <div style={{ display: 'flex' }}>
                     {/* Lista över skins */}
@@ -64,18 +82,16 @@ export default function Shop() {
                             <h3>{skin.name}</h3>
                             <div>
                                 <p>Price: ${skin.price}</p>
-                                <button onClick={() => addToCart(skin)}>Add to Cart</button>
+                                <button onClick={() => addToCart(skin)}>Buy Now</button>
                             </div>
                         </div>
                     ))}
                 </div>
                 <div style={{ listStyle: 'none', marginTop: '30px' }}>
-                   
                 </div>
                 <hr />
             </div>
             <div>
-
                 <div style={{ marginTop: '30px', }}>
                     <h2>Cart</h2>
                     {cart.length > 0 ? (
@@ -93,16 +109,17 @@ export default function Shop() {
                                     </div>
                                 ))}
                             </div>
+                            <div>
                             <h3>Total: ${calculateTotal()}</h3>
+                            <button onClick={() => handleCheckout(cart[0].skin.priceId)}>Checkout</button> {/* Checkout button, using the first item's priceId */}
+                            </div>
+                            
                         </>
-
-
                     ) : (
                         <p>Your cart is empty.</p>
                     )}
                 </div>
             </div>
-
         </div>
     );
 }
