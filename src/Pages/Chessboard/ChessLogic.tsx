@@ -3,7 +3,7 @@ import { request, getAuthToken } from '../../axios_helper'
 
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-const socket = new SockJS("http://localhost:8080/ws");
+const socket = new SockJS("https://chessslug-backend-production.up.railway.app/ws");
 const stompClient = Stomp.over(socket);
 stompClient.debug = f => f;
 var stompFailureCallback = function (error: any) {

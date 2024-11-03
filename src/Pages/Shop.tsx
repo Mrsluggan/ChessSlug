@@ -69,47 +69,8 @@ export default function Shop() {
                         </div>
                     ))}
                 </div>
-                <hr />
                 <div style={{ listStyle: 'none', marginTop: '30px' }}>
-                    <h2>Tired of losing?</h2>
-                    <p>Try one of these next fight</p>
-                    <ul style={{ listStyle: 'none', display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <li>Disable your opponent's moves for 5 turns
-                            <button onClick={() => addToCart({
-                                id: 4,
-                                name: "Disable opponents moves",
-                                price: 50,
-                                imageUrl: ""
-                            })}>Add to Cart</button>
-                            Price: $50
-
-                        </li>
-
-                        <li> Make your pawns be invisible
-                            <button onClick={() => addToCart({
-                                id: 5,
-                                name: "Invisible pawns",
-                                price: 50,
-                                imageUrl: ""
-                            })}>
-                                Add to Cart
-                            </button>
-                            Price: $50
-
-                        </li>
-
-                        <li>Nuke your opponent <button onClick={() => addToCart({
-                            id: 6,
-                            name: "Nuke",
-                            price: 1000,
-                            imageUrl: ""
-                        })}>Add to Cart</button>
-                            Price: $1000
-                        </li>
-
-
-
-                    </ul>
+                   
                 </div>
                 <hr />
             </div>

@@ -1,7 +1,5 @@
 import React from 'react'
-import LoginFunction from '../userFunctions/LoginFunction';
 import { handleLogout } from '../userFunctions/userRestFunctions';
-import Register from '../userFunctions/Register';
 import { useContext } from 'react';
 import { UserLoggedInContext } from '../../App';
 
@@ -27,7 +25,7 @@ export default function Sidebar({ handleSetLoggedIn }: SidebarProps) {
 
                     )}
 
-                    
+
                     <li><a href="/">Spela</a></li>
                     <li><a href="/friends">Vänner</a></li>
                     <li><a href="/learn">Lär dig</a></li>

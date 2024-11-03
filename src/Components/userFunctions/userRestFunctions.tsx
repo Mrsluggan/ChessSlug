@@ -1,6 +1,4 @@
-import React, { useContext } from 'react'
 import { request, setAuthToken, setUser} from '../../axios_helper';
-import { UserLoggedInContext } from '../../App';
 
 export const handleRegister = (firstName: string, lastName: string, login: string, password: string): Promise<boolean> => {
     return new Promise((resolve, reject) => {
