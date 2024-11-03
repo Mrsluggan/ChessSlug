@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from 'react';
-import { Routes, Route, Router } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes } from "react-router-dom";
 
 import Home from './Pages/Home';
 import Sidebar from './Components/Navbar/Sidebar';
@@ -29,7 +29,8 @@ function App() {
 
   return (
     <div className="App" style={{ height: "100%", display: "flex" }}>
-        <UserLoggedInContext.Provider value={isLoggedIn}>
+      <UserLoggedInContext.Provider value={isLoggedIn}>
+        <Router>
           <Sidebar handleSetLoggedIn={handleSetLoggedIn} />
           <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
             <Header />
@@ -37,12 +38,12 @@ function App() {
               <Route index element={<Home handleSetLoggedIn={handleSetLoggedIn} />} />
               <Route path="/store" element={<Shop />} />
               <Route path="/learn" element={<Learn />} />
-              <Route path="*" element={<> error 404</>} />
+              <Route path="*" element={<div>error 404</div>} />
             </Routes>
           </div>
-        </UserLoggedInContext.Provider>
+        </Router>
+      </UserLoggedInContext.Provider>
     </div>
   );
 }
-
 export default App;
