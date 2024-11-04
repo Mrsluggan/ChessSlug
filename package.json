@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@types/sockjs-client": "^1.5.4",
+    "@types/stripe": "^8.0.417",
     "gh-pages": "^6.2.0"
   }
 }

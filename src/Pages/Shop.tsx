@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { request } from '../axios_helper';
+import { loadStripe } from '@stripe/stripe-js';
 
-// Typ för ett skin
 interface Skin {
-    id: string; // Changed to string to match Stripe product IDs
+    id: string;
     name: string;
-    price: number; // You can store price as number for calculation
+    price: number; // Price in dollars
     imageUrl: string;
 }
 
-// Typ för ett kundvagnsobjekt
 interface CartItem {
     skin: Skin;
     quantity: number;
@@ -17,24 +17,23 @@ interface CartItem {
 export default function Shop() {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [skins, setSkins] = useState<Skin[]>([]);
+    const stripePromise = loadStripe('pk_test_51QFxXbIk0uS4qh85QjN9NzoeemiGcpb7ZjetM3Zb9TX64gzHML98SwqEGw7vS8GEdD6GkzxVzLdk2p0ME6Tw3gH400aLFvq8Yo');
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch('/api/products');
-                const data = await response.json();
+                const response = await request("GET", '/api/products');
+                console.log(response.data);
+                
+                // Map response data to Skin array
+                const productsWithPrices = response.data.map((product: any) => ({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price, // Price is already in dollars
+                    imageUrl: product.imageUrl || '',
+                }));
+                setSkins(productsWithPrices);
 
-                // Map product data to Skin format
-                const skinData: Skin[] = data.flatMap((product: { prices: any[]; id: any; name: any; images: any[]; }) => 
-                    product.prices.map((price: { unit_amount: number; }) => ({
-                        id: product.id,
-                        name: product.name,
-                        price: price.unit_amount / 100, // Stripe stores prices in cents
-                        imageUrl: product.images[0], // Assuming the first image is the primary
-                    }))
-                );
-
-                setSkins(skinData);
             } catch (error) {
                 console.error('Error fetching products:', error);
             }
@@ -46,14 +45,12 @@ export default function Shop() {
     const addToCart = (skin: Skin) => {
         setCart((prevCart) => {
             const existingItem = prevCart.find(item => item.skin.id === skin.id);
-            if (existingItem) {
-                return prevCart.map(item =>
-                    item.skin.id === skin.id
-                        ? { ...item, quantity: item.quantity + 1 }
-                        : item
-                );
+            if (!existingItem) {
+                return [...prevCart, { skin, quantity: 1 }];
             }
-            return [...prevCart, { skin, quantity: 1 }];
+            return prevCart.map(item => 
+                item.skin.id === skin.id ? { ...item, quantity: item.quantity + 1 } : item
+            );
         });
     };
 
@@ -65,23 +62,20 @@ export default function Shop() {
         return cart.reduce((total, item) => total + item.skin.price * item.quantity, 0);
     };
 
-    const handleCheckout = async (priceId: string) => {
+    const handleCheckout = async () => {
         try {
-            const response = await fetch('/api/payments/create-checkout-session', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ priceId }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create checkout session');
-            }
-
-            const sessionUrl = await response.text();
-            window.location.href = sessionUrl;
-
+            const stripe = await stripePromise;
+            if (!stripe) throw new Error('Stripe.js is not loaded');
+    
+            // Send a POST request with the cart to the backend
+            const response = await request("POST", '/api/create-checkout-session', [...cart]);
+    
+            const { id } = response.data;
+    
+            // Redirect the user to Stripe Checkout
+            const { error } = await stripe.redirectToCheckout({ sessionId: id });
+            if (error) console.error(error.message);
+    
         } catch (error) {
             console.error('Error during checkout:', error);
         }
@@ -94,15 +88,14 @@ export default function Shop() {
                 <hr />
                 <h2>Tired of the same old board color?</h2>
                 <p>Try one of these!</p>
-                <div style={{ display: 'flex' }}>
-                    {/* Lista över skins */}
+                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {skins.map(skin => (
-                        <div key={skin.id} style={{ display: 'flex', flexDirection: 'column', justifyContent: "space-between", border: '1px solid #ccc', padding: '10px', width: '200px' }}>
-                            <img src={skin.imageUrl} alt={skin.name} style={{ width: '100%', height: '100px' }} />
+                        <div key={skin.id} style={{ display: 'flex', flexDirection: 'column', justifyContent: "space-between", border: '1px solid #ccc', padding: '10px', width: '200px', margin: '10px' }}>
+                            <img src={skin.imageUrl} alt={skin.name} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
                             <h3>{skin.name}</h3>
                             <div>
-                                <p>Price: ${skin.price}</p>
-                                <button onClick={() => handleCheckout(skin.id)}>Buy Now</button>
+                                <p>Price: ${skin.price.toFixed(2)}</p>
+                                <button onClick={() => addToCart(skin)}>Buy Now</button>
                             </div>
                         </div>
                     ))}
@@ -110,25 +103,25 @@ export default function Shop() {
                 <hr />
             </div>
             <div>
-                <div style={{ marginTop: '30px', }}>
+                <div style={{ marginTop: '30px' }}>
                     <h2>Cart</h2>
                     {cart.length > 0 ? (
                         <>
-                            <div style={{ height: "500px", overflowX: 'auto' }} >
+                            <div style={{ height: "500px", overflowY: 'auto' }}>
                                 {cart.map(item => (
-                                    <div key={item.skin.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', }}>
-                                        <img src={item.skin.imageUrl} alt={item.skin.name} style={{ width: '100px', height: '50px' }} />
+                                    <div key={item.skin.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <img src={item.skin.imageUrl} alt={item.skin.name} style={{ width: '100px', height: '50px', objectFit: 'cover' }} />
                                         <div>
                                             <h4>{item.skin.name}</h4>
                                             <p>Quantity: {item.quantity}</p>
-                                            <p>Price: ${item.skin.price * item.quantity}</p>
+                                            <p>Price: ${(item.skin.price * item.quantity).toFixed(2)}</p>
                                             <button onClick={() => removeFromCart(item.skin.id)}>Remove</button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                            <h3>Total: ${calculateTotal()}</h3>
-                            <button onClick={() => handleCheckout(cart[0].skin.id)}>Checkout</button>
+                            <h3>Total: ${calculateTotal().toFixed(2)}</h3>
+                            <button onClick={handleCheckout}>Checkout</button>
                         </>
                     ) : (
                         <p>Your cart is empty.</p>

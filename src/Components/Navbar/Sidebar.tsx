@@ -26,10 +26,10 @@ export default function Sidebar({ handleSetLoggedIn }: SidebarProps) {
                     )}
 
 
-                    <li><a href="https://mrsluggan.github.io/ChessSlug">Spela</a></li>
-                    <li><a href="https://mrsluggan.github.io/ChessSlug/#/friends">Vänner</a></li>
-                    <li><a href="https://mrsluggan.github.io/ChessSlug/#/learn">Lär dig</a></li>
-                    <li><a href="https://mrsluggan.github.io/ChessSlug/#/store">Affär</a></li>
+                    <li><a href="/">Spela</a></li>
+                    <li><a href="/friends">Vänner</a></li>
+                    <li><a href="/learn">Lär dig</a></li>
+                    <li><a href="#/store">Affär</a></li>
 
 
 
